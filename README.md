@@ -28,7 +28,14 @@ Steps to install:
 
 <img src ="Images/random_vs_perlin.png" width = "1500">
 
+## Perlin Noise - Normal (Bell Curve) Behaviour
+<img src ="Images/perlin_bell_curve.png" width = "1500">
+
 ## Perlin Noise (2 Dimensional) (simple 2d map geneartion)
 <img src ="Images/perlin_2d_map_generation_seed_1000.png" width = "1500">
 
 > Image generation through matplotlib is costly (heavy time consuming). Hence PIL library in python for image manipulation is used.
+
+
+## Terrain Generation (Composite perlin noise approach)
+<img src ="Images/terrain_3d.png" width = "1500">
