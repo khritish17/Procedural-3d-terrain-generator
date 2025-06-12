@@ -1,7 +1,9 @@
 # importing standard libraries
 import numpy as np
 import noise 
-import random
+from matplotlib import cm
+from matplotlib import pyplot as plt
+
 
 class Perlin3d:
     def __init__(self, height = 256, width = 256):
@@ -12,6 +14,14 @@ class Perlin3d:
         self.lacunarity = 2.0
         self.seed = 1000
         self.offset = (0, 0) # (offset_x, offset_y)
+
+        self.scale_height = 1000.0
+        self.octaves_height = 6
+        self.persistence_height = 0.5
+        self.lacunarity_height = 2.0
+        self.seed_height = 200
+        self.min_height = 10
+        self.max_height = 200
         """
         Parameters:
             shape (tuple):        The dimensions of the noise array (width, height).
@@ -29,7 +39,14 @@ class Perlin3d:
                                   seed will be used.
         """
     
-    def set_parameters(self, height = 256, width = 256, scale = 100, octaves = 6, persistence = 0.5, lacunarity = 2.0, seed = 1000, offset_x = 0, offset_y = 0):
+    def set_parameters(self, height = 256, width = 256, 
+                       scale = 100.0, octaves = 6, 
+                       persistence = 0.5, lacunarity = 2.0, 
+                       seed = 100, 
+                       offset_x = 0, offset_y = 0,
+                       scale_height = 1000, octaves_height = 6,
+                       persistence_height = 0.5, lacunarity_height = 2.0,
+                       seed_height = 200, min_height = 10, max_height = 200):
         self.shape = (height, width)
         self.scale = scale
         self.octaves = octaves
@@ -38,40 +55,55 @@ class Perlin3d:
         self.seed = seed
         self.offset = (offset_x, offset_y)
         
-    def generate_perlin_noise(self):
-        perlin_noise = np.zeros(self.shape)
+        # height noise parameters
+        self.scale_height = scale_height
+        self.octaves_height = octaves_height
+        self.persistence_height = persistence_height
+        self.lacunarity_height = lacunarity_height
+        self.seed_height = seed_height
+        self.min_height = min_height
+        self.max_height = max_height
+    
+    def generate_terrain_data(self):
+        view_port = np.zeros(self.shape)
         for x in range(self.shape[0]):
             for y in range(self.shape[1]):
                 new_x = (x + self.offset[0]) / self.scale
                 new_y = (y  + self.offset[1]) / self.scale
-                perlin_noise[x][y] = noise.snoise2(new_x, new_y, 
-                                                        octaves = self.octaves,
-                                                        persistence = self.persistence,
-                                                        lacunarity = self.lacunarity,
-                                                        base = self.seed,
-                                                        repeatx = self.shape[0],
-                                                        repeaty = self.shape[1])
-        return perlin_noise
+                base_noise = noise.snoise2(new_x, new_y, 
+                                         octaves = self.octaves,
+                                         persistence = self.persistence,
+                                         lacunarity = self.lacunarity,
+                                         base = self.seed,
+                                         repeatx = self.shape[0],
+                                         repeaty = self.shape[1])
+                height_noise = noise.snoise2(new_x, new_y, 
+                                         octaves = self.octaves_height,
+                                         persistence = self.persistence_height,
+                                         lacunarity = self.lacunarity_height,
+                                         base = self.seed_height,
+                                         repeatx = self.shape[0],
+                                         repeaty = self.shape[1])
+                normalized_height_noise = (height_noise + 1)/2
+
+                modulated_height  = base_noise * normalized_height_noise
+                # linear interpolation to map the modulated height range from [-1, 1] to [min_height, max_height]
+                height = self.min_height + (modulated_height + 1) * ((self.max_height - self.min_height)/2)
+                view_port[x][y] = height
+        return view_port
     
-    def generate_height_map(self):
-        # get the perlin noise for terrain base
-        perlin_noise = self.generate_perlin_noise() # value ranges : [-1, +1]
-        random.seed(self.seed)
-        random_delta = random.randint(10, 10000)
-        scale_delta = random.randint(1, 10)
-        self.seed += random_delta
-        self.scale *= scale_delta # base terain is (small scale) : generates small bumpy features
-                                  # height terain is (high scale): generate large sweeping region 
+    def plot3d_matplotlib(self):
+        view_port = self.generate_terrain_data()
+        X = [i for i in range(len(view_port))]
+        Y = [i for i in range(len(view_port[0]))]
+        X, Y = np.meshgrid(X, Y)
+        Z = view_port
+        fig, ax = plt.subplots(subplot_kw={"projection": "3d"})
+        ax.plot_surface(X, Y, Z, cmap=cm.coolwarm,
+                       linewidth=0, antialiased=False)
+        plt.show()
 
-        # get another perlin noise for using it as a height_multiplier
-        height_noise = self.generate_perlin_noise() # value ranges : [-1, +1]
-
-        # back to original parameters 
-        self.seed -= random_delta
-        self.scale /= scale_delta
-
-        # modulated height
 
 P = Perlin3d()
-P.set_parameters(height=2, width=3)
-P.generate_perlin_noise()
+P.set_parameters(height=100, width=100)
+P.plot3d_matplotlib()
