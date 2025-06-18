@@ -42,7 +42,7 @@ class Perlin3d:
     def set_parameters(self, height = 256, width = 256, 
                        scale = 100.0, octaves = 6, 
                        persistence = 0.5, lacunarity = 2.0, 
-                       seed = 100, 
+                       seed = 1000, 
                        offset_x = 0, offset_y = 0,
                        scale_height = 1000, octaves_height = 6,
                        persistence_height = 0.5, lacunarity_height = 2.0,
@@ -105,5 +105,5 @@ class Perlin3d:
 
 
 P = Perlin3d()
-P.set_parameters(height=100, width=100)
+P.set_parameters(height=100, width=100, seed=100)
 P.plot3d_matplotlib()
