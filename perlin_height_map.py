@@ -9,38 +9,6 @@ import noise
 import json
 import sys
 
-def perlin_height_map_api(json_param):
-    # Create a Perlin_height_map object
-    PHM = Perlin_Height_Map()
-    if json_param:
-        param = json.loads(json_param)
-        view_height = param['view_height']
-        view_width = param['view_width']
-        terrain_scale = param['terrain_scale']
-        terrain_octaves = param['terrain_octaves']
-        terrain_persistence = param['terrain_persistence']
-        terrain_lacunarity = param['terrain_lacunarity']
-        terrain_seed = param['terrain_seed']
-        offset_x = param['offset_x']
-        offset_y = param['offset_y']
-        height_scale = param['height_scale']
-        height_octaves = param['height_octaves']
-        height_persistence = param['height_persistence']
-        height_lacunarity = param['height_lacunarity']
-        height_seed = param['height_seed']
-        min_height = param['min_height']
-        max_height = param['max_height']
-        PHM.set_parameters(view_height = view_height, view_width = view_width, 
-                       terrain_scale = terrain_scale, terrain_octaves = terrain_octaves, 
-                       terrain_persistence = terrain_persistence, terrain_lacunarity = terrain_lacunarity, 
-                       terrain_seed = terrain_seed, 
-                       offset_x = offset_x, offset_y = offset_y,
-                       height_scale = height_scale, height_octaves = height_octaves,
-                       height_persistence = height_persistence, height_lacunarity = height_lacunarity,
-                       height_seed = height_seed, min_height = min_height, max_height = max_height)
-    height_map = PHM.generate_terrain_map()
-    return height_map.flatten().tolist()
-
 class Perlin_Height_Map:
     def __init__(self, view_height = 100, view_width = 100):
         self.shape = (view_height, view_width) 
@@ -133,6 +101,37 @@ class Perlin_Height_Map:
                 height = self.min_height + (modulated_height + 1) * ((self.max_height - self.min_height)/2)
                 view_port[x][y] = height
         return view_port
+def perlin_height_map_api(json_param):
+    # Create a Perlin_height_map object
+    PHM = Perlin_Height_Map()
+    if json_param:
+        param = json.loads(json_param)
+        view_height = param['view_height']
+        view_width = param['view_width']
+        terrain_scale = param['terrain_scale']
+        terrain_octaves = param['terrain_octaves']
+        terrain_persistence = param['terrain_persistence']
+        terrain_lacunarity = param['terrain_lacunarity']
+        terrain_seed = param['terrain_seed']
+        offset_x = param['offset_x']
+        offset_y = param['offset_y']
+        height_scale = param['height_scale']
+        height_octaves = param['height_octaves']
+        height_persistence = param['height_persistence']
+        height_lacunarity = param['height_lacunarity']
+        height_seed = param['height_seed']
+        min_height = param['min_height']
+        max_height = param['max_height']
+        PHM.set_parameters(view_height = view_height, view_width = view_width, 
+                       terrain_scale = terrain_scale, terrain_octaves = terrain_octaves, 
+                       terrain_persistence = terrain_persistence, terrain_lacunarity = terrain_lacunarity, 
+                       terrain_seed = terrain_seed, 
+                       offset_x = offset_x, offset_y = offset_y,
+                       height_scale = height_scale, height_octaves = height_octaves,
+                       height_persistence = height_persistence, height_lacunarity = height_lacunarity,
+                       height_seed = height_seed, min_height = min_height, max_height = max_height)
+    height_map = PHM.generate_terrain_map()
+    return height_map.flatten().tolist()
 
 if __name__ == "__main__":
     if len(sys.argv) > 1:
