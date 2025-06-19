@@ -42,7 +42,7 @@ def perlin_height_map_api(json_param):
     return height_map.flatten().tolist()
 
 class Perlin_Height_Map:
-    def __init__(self, view_height = 256, view_width = 256):
+    def __init__(self, view_height = 100, view_width = 100):
         self.shape = (view_height, view_width) 
         self.offset = (0, 0) # (offset_x, offset_y)
         
@@ -78,7 +78,7 @@ class Perlin_Height_Map:
                                   seed will be used.
         """
     
-    def set_parameters(self, view_height = 256, view_width = 256, 
+    def set_parameters(self, view_height = 100, view_width = 100, 
                        terrain_scale = 100.0, terrain_octaves = 6, 
                        terrain_persistence = 0.5, terrain_lacunarity = 2.0, 
                        terrain_seed = 1000, 
