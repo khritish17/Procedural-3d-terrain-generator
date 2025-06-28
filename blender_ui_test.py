@@ -2,8 +2,8 @@ import bpy
 
 # Addon information (essential for proper addon setup)
 bl_info = {
-    "name": "My Custom Panel",
-    "author": "Your Name",
+    "name": "Procedural Terrain Generator",
+    "author": "Khritish Kumar Behera",
     "version": (1, 0),
     "blender": (3, 0, 0), # Minimum Blender version
     "location": "3D View > Sidebar > My Tools Tab",
@@ -13,8 +13,6 @@ bl_info = {
     "category": "Development",
 }
 
-# 1. Define a Panel Class
-# All UI elements in Blender are classes that inherit from bpy.types.Panel, bpy.types.Menu, etc.
 class Procedural_Terrain_Generator(bpy.types.Panel):
     bl_label = "Terrain Generator Properties" # The name displayed at the top of the panel
     bl_idname = "PTG_properties" # Unique identifier for the panel
