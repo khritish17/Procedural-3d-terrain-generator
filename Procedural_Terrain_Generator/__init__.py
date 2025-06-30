@@ -4,6 +4,7 @@ import os
 from . import util
 from . import ui_properties
 from . import ui
+from . import operators
 
 # Addon Information
 bl_info = {
@@ -14,12 +15,13 @@ bl_info = {
     "location": "3D View > Sidebar > Terrain Generator Properties",
     "description": "To generate infinite terrain seamlessly using Perlin noise.",
     "warning": "",
-    "doc_url": "",
+    "doc_url": "https://github.com/khritish17/Procedural-3d-terrain-generator/blob/master/README.md",
     "category": "Mesh",
 }
 classes = [
     ui_properties.PTG_Properties,
     ui.PTG_UI,
+    operators.PTG_Generate_Operator,
 ]
 
 def register():

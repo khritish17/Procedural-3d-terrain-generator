@@ -11,6 +11,8 @@ class PTG_UI(bpy.types.Panel):
         layout = self.layout
         scene = context.scene
         
+        
+
         # Access the custom property group
         ptg_props = scene.ptg_props
         
@@ -44,3 +46,10 @@ class PTG_UI(bpy.types.Panel):
         col.prop(ptg_props, "height_lacunarity")
         col.prop(ptg_props, "min_height")
         col.prop(ptg_props, "max_height")
+
+        # Generate button
+        layout.separator()
+        row = layout.row(align = True)
+        row.scale_y = 1.5
+        row.operator("ptg.generate_terrain", icon='MESH_PLANE')
+        
