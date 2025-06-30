@@ -1,6 +1,9 @@
 import bpy 
 import os 
+
 from . import util
+from . import ui_properties
+from . import ui
 
 # Addon Information
 bl_info = {
@@ -14,14 +17,19 @@ bl_info = {
     "doc_url": "",
     "category": "Mesh",
 }
-classes = []
+classes = [
+    ui_properties.PTG_Properties,
+    ui.PTG_UI,
+]
 
 def register():
     # entry point of the addon
     # check and configure 
-    adon_dir = os.path.dirname(bpy.path.abspath(__file__))
-    util.check_and_configure(adon_dir)
-    pass
-
+    addon_dir = os.path.dirname(bpy.path.abspath(__file__))
+    util.check_and_configure(addon_dir)
+    for cls in classes:
+        bpy.utils.register_class(cls)
+    bpy.types.Scene.ptg_props = bpy.props.PointerProperty(type=ui_properties.PTG_Properties)
 def unregister():
-    pass
+    for cls in reversed(classes):
+        bpy.utils.unregister_class(cls)
