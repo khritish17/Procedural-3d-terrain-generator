@@ -32,6 +32,17 @@ def register():
     for cls in classes:
         bpy.utils.register_class(cls)
     bpy.types.Scene.ptg_props = bpy.props.PointerProperty(type=ui_properties.PTG_Properties)
+
 def unregister():
+    # global ui_properties._update_timer_handle
+    if ui_properties._update_timer_handle is not None:
+        try:
+            bpy.app.timers.unregister(ui_properties._update_timer_handle)
+            ui_properties._update_timer_handle = None
+            print("-> PTG log: Unregistered terrain update timer")
+        except ValueError:
+            pass
+    if hasattr(bpy.types.Scene, 'ptg_props'):
+        del bpy.types.Scene.ptg_props
     for cls in reversed(classes):
         bpy.utils.unregister_class(cls)

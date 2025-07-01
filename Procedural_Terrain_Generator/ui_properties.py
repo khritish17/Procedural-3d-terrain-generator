@@ -1,5 +1,28 @@
 import bpy 
 
+_update_timer_handle = None
+
+def update_terrain_mesh_debounced(self, context):
+    global _update_timer_handle
+
+    if _update_timer_handle is not None:
+        try:
+            bpy.app.timers.unregister(_update_timer_handle)
+            _update_timer_handle = None
+        except ValueError:
+            _update_timer_handle = None
+    if "PTG_Terrain_object" in bpy.data.objects and bpy.data.objects["PTG_Terrain_object"].type == 'MESH':
+
+        def update_terrain_mesh():
+            # invoke the terrain generation functions
+            print("Update trigger")
+
+
+            global _update_timer_handle
+            _update_timer_handle = None
+            return None
+        _update_timer_handle = bpy.app.timers.register(update_terrain_mesh, first_interval=0.1)
+
 class PTG_Properties(bpy.types.PropertyGroup):
     """
         Custom property group for the ui panel
@@ -25,7 +48,8 @@ class PTG_Properties(bpy.types.PropertyGroup):
         min = -10000.0,
         max = 10000.0,
         step = 100, # Adjust step for finer control
-        precision = 2
+        precision = 2,
+        update = update_terrain_mesh_debounced
     )
     offset_y: bpy.props.FloatProperty(
         name = "Offset Y",
@@ -34,7 +58,8 @@ class PTG_Properties(bpy.types.PropertyGroup):
         min = -10000.0,
         max = 10000.0,
         step = 100,
-        precision = 2
+        precision = 2,
+        update = update_terrain_mesh_debounced
     )
 
     # Perlin noise parameters for terrain (base)
@@ -43,7 +68,8 @@ class PTG_Properties(bpy.types.PropertyGroup):
         description = "An integer seed value to generate a specific, reproducible noise pattern for the base terrain.",
         default = 0,
         min = -100000,
-        max = 100000
+        max = 100000,
+        update = update_terrain_mesh_debounced
     )
     terrain_scale: bpy.props.FloatProperty(
         name = "Terrain Scale",
@@ -56,7 +82,8 @@ class PTG_Properties(bpy.types.PropertyGroup):
         min = 1.0,
         max = 1000.0,
         step = 10,
-        precision = 2
+        precision = 2,
+        update = update_terrain_mesh_debounced
     )
     terrain_octaves: bpy.props.IntProperty(
         name = "Terrain Octaves",
@@ -66,7 +93,8 @@ class PTG_Properties(bpy.types.PropertyGroup):
         ),
         default = 6,
         min = 1,
-        max = 10
+        max = 10,
+        update = update_terrain_mesh_debounced
     )
     terrain_persistence: bpy.props.FloatProperty(
         name = "Terrain Persistence",
@@ -80,7 +108,8 @@ class PTG_Properties(bpy.types.PropertyGroup):
         min = 0.0,
         max = 1.0,
         step = 1,
-        precision = 2
+        precision = 2,
+        update = update_terrain_mesh_debounced
     )
     terrain_lacunarity: bpy.props.FloatProperty(
         name = "Terrain Lacunarity",
@@ -94,7 +123,8 @@ class PTG_Properties(bpy.types.PropertyGroup):
         min = 1.0,
         max = 3.5,
         step = 1,
-        precision = 2
+        precision = 2,
+        update = update_terrain_mesh_debounced
     )
 
     # Perlin noise parameters for height modulation
@@ -103,7 +133,8 @@ class PTG_Properties(bpy.types.PropertyGroup):
         description = "An integer seed value to generate a specific, reproducible noise pattern for height modulation.",
         default = 0,
         min = -100000,
-        max = 100000
+        max = 100000,
+        update = update_terrain_mesh_debounced
     )
     height_scale: bpy.props.FloatProperty(
         name = "Height Scale",
@@ -116,7 +147,8 @@ class PTG_Properties(bpy.types.PropertyGroup):
         min = 1.0,
         max = 1000.0,
         step = 10,
-        precision = 2
+        precision = 2,
+        update = update_terrain_mesh_debounced
     )
     height_octaves: bpy.props.IntProperty(
         name = "Height Octaves",
@@ -126,7 +158,8 @@ class PTG_Properties(bpy.types.PropertyGroup):
         ),
         default = 6,
         min = 1,
-        max = 10
+        max = 10,
+        update = update_terrain_mesh_debounced
     )
     height_persistence: bpy.props.FloatProperty(
         name = "Height Persistence",
@@ -140,7 +173,8 @@ class PTG_Properties(bpy.types.PropertyGroup):
         min = 0.0,
         max = 1.0,
         step = 1,
-        precision = 2
+        precision = 2,
+        update = update_terrain_mesh_debounced
     )
     height_lacunarity: bpy.props.FloatProperty(
         name = "Height Lacunarity",
@@ -154,7 +188,8 @@ class PTG_Properties(bpy.types.PropertyGroup):
         min = 1.0,
         max = 3.5,
         step = 1,
-        precision = 2
+        precision = 2,
+        update = update_terrain_mesh_debounced
     )
     min_height: bpy.props.FloatProperty(
         name = "Min Height",
@@ -163,7 +198,8 @@ class PTG_Properties(bpy.types.PropertyGroup):
         min = -1000.0, # Allow negative heights for underwater terrain
         max = 1000.0,
         step = 10,
-        precision = 2
+        precision = 2,
+        update = update_terrain_mesh_debounced
     )
     max_height: bpy.props.FloatProperty(
         name = "Max Height",
@@ -172,5 +208,6 @@ class PTG_Properties(bpy.types.PropertyGroup):
         min = -1000.0,
         max = 1000.0,
         step = 10,
-        precision = 2
+        precision = 2,
+        update = update_terrain_mesh_debounced
     )
