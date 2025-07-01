@@ -1,2 +1,0 @@
-C:\Users\HP\AppData\Local\Programs\Python\Python310\python.exe
-C:\Users\HP\AppData\Local\Microsoft\WindowsApps\python.exe
