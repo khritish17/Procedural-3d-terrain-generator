@@ -21,7 +21,7 @@ class PTG_Generate_Terrain_Mesh:
             print("-> PTG log: [Error] No Python executable found !!!!")
             return None
     
-    def terrain_mesh_generator(self, height_map_array, obj_name="Terrain"):
+    def terrain_mesh_generator(self, height_map_array, obj_name="PTG_Terrain_object"):
         """
         Generates a mesh in Blender from a 2D NumPy height map.
         Handles mesh creation, vertex assignment, and face generation.
@@ -61,25 +61,31 @@ class PTG_Generate_Terrain_Mesh:
                 # Triangle 2
                 faces.append((p1_index, p4_index, p3_index))
 
-        # Create new mesh data-block
-        mesh_data = bpy.data.meshes.new(obj_name)
+        obj = bpy.data.objects.get(obj_name)
+        mesh_data = None
+        print("Generator call")
+        if obj and obj.type == 'MESH':
+            mesh_data = obj.data
+            print(f"Updating existing mesh data for object: {obj_name}")
+        else:
+            mesh_data = bpy.data.meshes.new(obj_name + "_Mesh")
+            obj = bpy.data.objects.new(obj_name, mesh_data)
+            bpy.context.collection.objects.link(obj)
+            print(f"Created new mesh object: {obj_name}")
 
-        # Populate mesh data from our vertices and faces
-        # The second argument is for edges, which we leave empty as faces define edges
+        if bpy.ops.object.mode_set.poll():
+            bpy.ops.object.mode_set(mode='OBJECT')
+
+        mesh_data.clear_geometry()
         mesh_data.from_pydata(vertices, [], faces)
-        mesh_data.update() # Update the mesh data
+        mesh_data.update(calc_edges=True)
+        mesh_data.validate()
 
-        # Create a new object that uses this mesh data
-        obj = bpy.data.objects.new(obj_name + "_object", mesh_data)
-
-        # Link the object to the current scene's collection
-        bpy.context.collection.objects.link(obj)
-
-        # Select the newly created object and make it active
+        bpy.ops.object.select_all(action='DESELECT')
         bpy.context.view_layer.objects.active = obj
         obj.select_set(True)
 
-        print(f"Generated mesh '{obj_name}' with {len(vertices)} vertices and {len(faces)} faces.")
+        print(f"Mesh '{obj_name}' updated/generated with {len(vertices)} vertices and {len(faces)} faces.")
         return obj
 
     def ipc_perin_map_computation(self, params):
@@ -131,10 +137,11 @@ class PTG_Generate_Operator(bpy.types.Operator):
         height_map = mesh_generator.ipc_perin_map_computation(params=params)
 
         if height_map is not None:
-            mesh_generator.terrain_mesh_generator(height_map_array=height_map, obj_name="PTG_Terrain")
+            mesh_generator.terrain_mesh_generator(height_map_array=height_map, obj_name="PTG_Terrain_object")
             self.report({'INFO'}, "Terrain generated successfully!")
             return {'FINISHED'}
         else:
             print("-> PTG log: [Error] issues in generating height_map !!!")
             self.report({'ERROR'}, "Failed to generate terrain height map.")
             return {'CANCELLED'}
+

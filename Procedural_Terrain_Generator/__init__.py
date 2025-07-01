@@ -21,7 +21,7 @@ bl_info = {
 classes = [
     ui_properties.PTG_Properties,
     ui.PTG_UI,
-    operators.PTG_Generate_Operator,
+    operators.PTG_Generate_Operator
 ]
 
 def register():
