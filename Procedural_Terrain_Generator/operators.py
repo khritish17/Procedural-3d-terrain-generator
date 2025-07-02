@@ -5,13 +5,17 @@ import subprocess
 import numpy as np
 
 class PTG_Generate_Terrain_Mesh:
-    
+    """
+        The whole terrain generation module
+    """
     def __init__(self, addon_dir):
         self.addon_dir = addon_dir
         self.PYTHON_EXE = self.get_python_exe()
         self.PERLIN_FILE = os.path.join(self.addon_dir, "perlin_height_map.py")
     
     def get_python_exe(self):
+        # reads the global python executable path from 'python_exe_path.txt'
+        # if the file does not exist, error in initialization
         try:
             python_exe_path = os.path.join(self.addon_dir, "python_exe_path.txt")
             with open(python_exe_path, "r") as f:
@@ -22,21 +26,13 @@ class PTG_Generate_Terrain_Mesh:
             return None
     
     def terrain_mesh_generator(self, height_map_array, obj_name="PTG_Terrain_object"):
-        """
-        Generates a mesh in Blender from a 2D NumPy height map.
-        Handles mesh creation, vertex assignment, and face generation.
-        """
+        # Generates a mesh in Blender from a 2D NumPy height map.
+        # Handles mesh creation, vertex assignment, and face generation.
+        
         # Ensure a valid height map array is provided
         if not isinstance(height_map_array, np.ndarray) or height_map_array.ndim != 2:
             print("ERROR: Invalid height_map provided. Expected a 2D NumPy array.")
             return None
-
-        # Clear existing mesh (optional, can be controlled by operator properties)
-        # bpy.ops.object.select_all(action='DESELECT')
-        # if obj_name in bpy.data.objects:
-        #     obj_to_remove = bpy.data.objects[obj_name]
-        #     bpy.data.objects.remove(obj_to_remove, do_unlink=True)
-
 
         num_verts_x, num_verts_y = height_map_array.shape
 
@@ -60,18 +56,20 @@ class PTG_Generate_Terrain_Mesh:
                 faces.append((p1_index, p2_index, p4_index))
                 # Triangle 2
                 faces.append((p1_index, p4_index, p3_index))
-
+        
+        # retrieve the object in the scene, with the object name
         obj = bpy.data.objects.get(obj_name)
         mesh_data = None
-        print("Generator call")
         if obj and obj.type == 'MESH':
+            # if the object with the object name is a mesh object (i.e generate terrain) 
             mesh_data = obj.data
-            print(f"Updating existing mesh data for object: {obj_name}")
+            print(f"-> PTG log: Updating existing mesh data for object: {obj_name}")
         else:
+            # if no such object exists, create a mesh object with the object name
             mesh_data = bpy.data.meshes.new(obj_name + "_Mesh")
             obj = bpy.data.objects.new(obj_name, mesh_data)
             bpy.context.collection.objects.link(obj)
-            print(f"Created new mesh object: {obj_name}")
+            print(f"-> PTG log: Created new mesh object: {obj_name}")
 
         if bpy.ops.object.mode_set.poll():
             bpy.ops.object.mode_set(mode='OBJECT')
@@ -85,7 +83,7 @@ class PTG_Generate_Terrain_Mesh:
         bpy.context.view_layer.objects.active = obj
         obj.select_set(True)
 
-        print(f"Mesh '{obj_name}' updated/generated with {len(vertices)} vertices and {len(faces)} faces.")
+        print(f"-> PTG log: Mesh '{obj_name}' updated/generated with {len(vertices)} vertices and {len(faces)} faces.")
         return obj
 
     def ipc_perin_map_computation(self, params):

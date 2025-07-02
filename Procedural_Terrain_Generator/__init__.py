@@ -5,7 +5,9 @@ from . import util
 from . import ui_properties
 from . import ui
 from . import operators
-
+"""
+    Entry point of the addon,
+"""
 # Addon Information
 bl_info = {
     "name": "Procedural Terrain Generator",
@@ -26,15 +28,19 @@ classes = [
 
 def register():
     # entry point of the addon
-    # check and configure 
+    # to run the noise libraray the global python exe is required
+    # check_and_configure() in util.py gets the path to the global python exe
+    # and add it to a file 'python_exe_path.txt' 
     addon_dir = os.path.dirname(bpy.path.abspath(__file__))
     util.check_and_configure(addon_dir)
     for cls in classes:
         bpy.utils.register_class(cls)
+    
+    # a pointer to access the custom properties defined in ui_properties.py
     bpy.types.Scene.ptg_props = bpy.props.PointerProperty(type=ui_properties.PTG_Properties)
 
 def unregister():
-    # global ui_properties._update_timer_handle
+    
     if ui_properties._update_timer_handle is not None:
         try:
             bpy.app.timers.unregister(ui_properties._update_timer_handle)
