@@ -3,7 +3,7 @@
 - Blender Addon Installation Guide
   - Install Python
   - Install Microsoft c++ 14.0 or higher
-  - Install the library dependency
+  - Install the python library dependencies
   - Install the addon in blender 
 - Blender Quick Tutorial and Demo
 - Why noise lib over Builtin Blender Noise
@@ -21,7 +21,7 @@
 > - Python 3.x (globally installed on your system)
 > - Microsoft Visual C++ 14.0 or higher (for Windows, a C++ compiler for noise library compilation)
 
-
+### Install Python
 <details>
   <summary>How to install Python (click to expand)</summary>
 
@@ -91,6 +91,8 @@
 
 </details>
 
+### Install Microsoft Visual C++ 14.0 or greater
+
 <details>
   <summary>How to install Microsoft Visual C++ (click to expand)</summary>
 
@@ -114,7 +116,10 @@
   >    - After the installation completes, it's a good idea to restart your computer, although it's not always strictly necessary. This ensures all environment variables are correctly set.
 </details>
 
-After installing these, open your terminal/command prompt in the downloaded directory and run:
+###  Install the python library dependencies
+After installing the Python and Microsoft Visual C++, download the Addon Installer Package [from here]() 
+
+open your terminal/command prompt in the downloaded directory and run:
 
 ```Bash
 pip install -r requirements.txt
