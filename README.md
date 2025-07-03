@@ -119,11 +119,27 @@
 ###  Install the python library dependencies
 After installing the Python and Microsoft Visual C++, download the Addon Installer Package [from here]() 
 
+**The Installer package structure:**
+```
+├── PTG_Installer_Package
+├──── Procedural_Terrain_Generator.zip
+├──── PTG Installation Guide.pdf
+├──── README.txt
+├──── requirements.txt
+```
+
 open your terminal/command prompt in the downloaded directory and run:
 
 ```Bash
 pip install -r requirements.txt
 ```
+
+## Why PTG Blender Addon:
+It's an insightful question that why would someone choose **PTG Blender Addon**, while Blender does has its own buit-in noise capabilities, primarily exposed through:
+1. **mathutils.noise** module: A Python module that provides various noise Function (Perlin, Simplex, Voronoi, etc) directly accessaible via Python.
+2. **Shader Nodes**: These are visual nodes used in Blender's material and geometry node editors, which are highly optimized C/C++ implementations of various noise algorithms. While not directly callable from Python in the same way, they represent Blender's native noise generation.
+
+
 ## Random Noise vs Perlin Noise
 
 <img src ="Images/random_vs_perlin.png" width = "1500">
