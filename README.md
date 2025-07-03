@@ -1,7 +1,14 @@
 # Procedural Terrain Generator (PTG) - Blender Addon
 ## Content
 - Blender Addon Installation Guide
+  - Install Python
+  - Install Microsoft c++ 14.0 or higher
+  - Install the library dependency
+  - Install the addon in blender 
+- Blender Quick Tutorial and Demo
 - Why noise lib over Builtin Blender Noise
+- Perlin Noise Preimer
+- Addon - code - documentation
 ## PTG Blender-Addon Installation Guide
 >📌
 >The **"Procedural Terrain Generator"** addon uses the `noise` Python library for Perlin noise. Since `noise` is a C extension, it requires Python development headers, which are not included in Blender's embedded Python.
