@@ -116,8 +116,26 @@
   >    - After the installation completes, it's a good idea to restart your computer, although it's not always strictly necessary. This ensures all environment variables are correctly set.
 </details>
 
+> 📌 **Alternate to Microsoft Visual C++**
+> 
+> **MinGW-w64** is a much lighter-weight alternative to installing the full Visual Studio Build Tools. It provides a GCC (GNU Compiler Collection) environment that can compile C/C++ code for Windows.
+>
+> **Pros of MinGW-w64:**
+> - **Smaller Size:** Significantly smaller download and installation footprint compared to Visual Studio.
+> - **Open Source:** Fully open-source compiler toolchain.
+> - **Cross-Platform Familiarity:** If you're used to GCC on Linux, MinGW-w64 provides a similar environment on Windows.
+>
+> **Cons of MinGW-w64 (in this context)**:
+> - **Setup Can Be Tricky:** While smaller, getting MinGW-w64 set up correctly and ensuring pip finds it can sometimes be less straightforward than with MSVC, which Python's official installers are often pre-configured to work with.
+> - **Potential Compatibility:** Very rarely, some C extensions might have specific build flags or code that is more optimized or compatible with MSVC, but for common libraries like noise, GCC usually works fine.
+
 ###  Install the python library dependencies
 After installing the Python and Microsoft Visual C++, download the Addon Installer Package [from here]() 
+
+open your terminal/command prompt and run the following command:
+```Bash
+pip install numpy noise
+```
 
 **The Installer package structure:**
 ```
@@ -125,14 +143,9 @@ After installing the Python and Microsoft Visual C++, download the Addon Install
 ├──── Procedural_Terrain_Generator.zip
 ├──── PTG Installation Guide.pdf
 ├──── README.txt
-├──── requirements.txt
 ```
 
-open your terminal/command prompt in the downloaded directory and run:
 
-```Bash
-pip install -r requirements.txt
-```
 
 ## Why PTG Blender Addon:
 It's an insightful question that why would someone choose **PTG Blender Addon**, while Blender does has its own buit-in noise capabilities, primarily exposed through:
