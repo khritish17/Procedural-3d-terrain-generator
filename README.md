@@ -1,16 +1,18 @@
 # Procedural Terrain Generator (PTG) - Blender Addon
 ## Content
-- Blender Addon Installation Guide
-  - Install Python
-  - Install Microsoft c++ 14.0 or higher
-  - Install the python library dependencies
-  - Install the addon in blender 
+- **PTG Blender-Addon Installation Guide**
+  - **Installation Overview**
+  - **Install Python**
+  - **Install Microsoft c++ 14.0 or higher**
+      - **Alternate to Microsoft Visual C++** 
+  - **Install the python library dependencies**
+  - **Install the addon in blender** 
 - Blender Quick Tutorial and Demo
 - Why noise lib over Builtin Blender Noise
 - Perlin Noise Preimer
 - Addon - code - documentation
 ## PTG Blender-Addon Installation Guide
->📌
+>📌 Note:
 >The **"Procedural Terrain Generator"** addon uses the `noise` Python library for Perlin noise. Since `noise` is a C extension, it requires Python development headers, which are not included in Blender's embedded Python.
 >
 >To work around this and keep Blender responsive, we use Inter-Process Communication (IPC). This means:
@@ -21,7 +23,13 @@
 > - Python 3.x (globally installed on your system)
 > - Microsoft Visual C++ 14.0 or higher (for Windows, a C++ compiler for noise library compilation)
 
-### Install Python
+### Installation Overview
+- Step 1: Install Python in your device
+- Step 2: Install Microsoft Visual C++ 14.0 or greater in your device
+- Step 3: Install the library dependencies
+- Step 4: Install the Blender Addon
+
+### Step 1: Install Python
 <details>
   <summary>How to install Python (click to expand)</summary>
 
@@ -91,7 +99,7 @@
 
 </details>
 
-### Install Microsoft Visual C++ 14.0 or greater
+### Step 2: Install Microsoft Visual C++ 14.0 or greater
 
 <details>
   <summary>How to install Microsoft Visual C++ (click to expand)</summary>
@@ -129,16 +137,16 @@
 > - **Setup Can Be Tricky:** While smaller, getting MinGW-w64 set up correctly and ensuring pip finds it can sometimes be less straightforward than with MSVC, which Python's official installers are often pre-configured to work with.
 > - **Potential Compatibility:** Very rarely, some C extensions might have specific build flags or code that is more optimized or compatible with MSVC, but for common libraries like noise, GCC usually works fine.
 
-###  Install the python library dependencies
-After installing the Python and Microsoft Visual C++, download the PTG Blender Addon [from here]() 
+###  Step 3: Install the python library dependencies
+ 
 
 open your terminal/command prompt and run the following command:
 ```Bash
 pip install numpy noise
 ```
+After installing the Python, Microsoft Visual C++ and other library dependencies, download the PTG Blender Addon [from here]()
 
-Once all the necessary libraries and language packesges are installed
-### Install the Addon in Blender
+### Step 4: Install the Addon in Blender
 - **Open Blender:** Launch your Blender application.
 - **Go to Preferences:**
     - In Blender, go to `Edit` (top menu bar) > `Preferences...`.
@@ -167,16 +175,6 @@ Once all the necessary libraries and language packesges are installed
 - **Use the Addon:**
     - You should now see the "Terrain Generator Properties" panel with all your sliders and buttons.
     - Click the **"Generate Terrain"** button to create your first terrain!
-
- 
-
-**The Installer package structure:**
-```
-├── PTG_Installer_Package
-├──── Procedural_Terrain_Generator.zip
-├──── PTG Installation Guide.pdf
-├──── README.txt
-```
 
 ## Why PTG Blender Addon:
 It's an insightful question that why would someone choose **PTG Blender Addon**, while Blender does has its own buit-in noise capabilities, primarily exposed through:
