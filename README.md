@@ -130,12 +130,45 @@
 > - **Potential Compatibility:** Very rarely, some C extensions might have specific build flags or code that is more optimized or compatible with MSVC, but for common libraries like noise, GCC usually works fine.
 
 ###  Install the python library dependencies
-After installing the Python and Microsoft Visual C++, download the Addon Installer Package [from here]() 
+After installing the Python and Microsoft Visual C++, download the PTG Blender Addon [from here]() 
 
 open your terminal/command prompt and run the following command:
 ```Bash
 pip install numpy noise
 ```
+
+Once all the necessary libraries and language packesges are installed
+### Install the Addon in Blender
+- **Open Blender:** Launch your Blender application.
+- **Go to Preferences:**
+    - In Blender, go to `Edit` (top menu bar) > `Preferences...`.
+- **Navigate to Add-ons:**
+    - In the Blender Preferences window, click on the `Add-ons` tab on the left sidebar.
+- **Click "Install...":**
+    - At the top right of the Add-ons tab, you'll see a button labeled `Install...`. Click it.
+- **Browse to your Addon Folder:**
+    - A file browser window will appear. Navigate to the location where you have downloaded the `Procedural_Terrain_Generator.zip` file.
+    - **Important**: Do NOT unzip the `Procedural_Terrain_Generator.zip` file
+    - Select the `Procedural_Terrain_Generator.zip` file
+    - Click the Install Add-on button in the file browser.
+- **Search for the Addon:**
+    - After clicking "Install Add-on", you'll be returned to the `Add-ons` tab in Preferences.
+    - In the search bar (top left of the Add-ons tab), type `Procedural Terrain Generator`
+- **Activate the Checkbox:**
+    - The addon, "Procedural Terrain Generator," should appear in the list.
+    - Check the checkbox next to its name to enable it.
+- **Save the preferences:**
+    - To ensure the addon remains enabled every time you open Blender, click the `☰` (three-line) icon at the bottom-left of the Preferences window and select `Save Preferences`.
+- **Close Preferences:** Close the Blender Preferences window.
+- **Open the N-Panel:** In the 3D Viewport, press the `N` key on your keyboard. This will open the sidebar (also known as the N-panel or Properties panel) on the right side of the viewport.
+- **Find the "PTG Tools" Tab:**
+    - Look for a new tab in the N-panel labeled **"PTG Tools"**.
+    - Click on this tab.
+- **Use the Addon:**
+    - You should now see the "Terrain Generator Properties" panel with all your sliders and buttons.
+    - Click the **"Generate Terrain"** button to create your first terrain!
+
+ 
 
 **The Installer package structure:**
 ```
@@ -144,9 +177,6 @@ pip install numpy noise
 ├──── PTG Installation Guide.pdf
 ├──── README.txt
 ```
-
-### Installl the Blender Addon
-
 
 ## Why PTG Blender Addon:
 It's an insightful question that why would someone choose **PTG Blender Addon**, while Blender does has its own buit-in noise capabilities, primarily exposed through:
