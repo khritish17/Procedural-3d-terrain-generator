@@ -252,10 +252,16 @@ The tendency of multi-octave Perlin noise to exhibit a near-normal distribution 
 - Procedural Realism: Without this statistical property, you'd either have overly flat terrain or a chaotic, spiky mess. The quasi-normal distribution helps to create landscapes that look plausible without requiring manual sculpting or complex geological simulations.
 
 ## Perlin Noise (2 Dimensional) (simple 2d map geneartion)
+A basic example of procedural terrain generation using Perlin noise. It creates a height map, interprets different height ranges as different terrain features (like water, land, and vegetation), and then visualizes this terrain using colored dots. The parameters of the Perlin noise function allow for significant control over the generated landscape's appearance.
+
 <img src ="Images/perlin_2d_map_generation_seed_1000.png" width = "1500">
 
 > Image generation through matplotlib is costly (heavy time consuming). Hence PIL library in python for image manipulation is used.
 
-
 ## Terrain Generation (Composite perlin noise approach)
+[The code]() creates a procedural terrain generator. It uses two layers of Perlin noise: a "base noise" for the overall landscape shape and a "height noise" to modulate (influence) the base noise, adding more intricate details and variations to the elevation. The generated height values are then scaled to a specified minimum and maximum height.
+
+The output is a 3D surface plot displayed using Matplotlib. This plot visually represents the generated terrain, with colors typically indicating elevation (e.g., lower areas might be blue, higher area red or yellow, depending on the coolwarm colormap).
+
+It aims to procedurally generate a realistic-looking 3D terrain. By combining multiple Perlin noise functions and carefully controlling their parameters, it simulates the complex and varied topography found in natural landscapes, from subtle undulations to more pronounced peaks and valleys, and then renders this as a 3D surface.
 <img src ="Images/terrain_3d.png" width = "1500">
