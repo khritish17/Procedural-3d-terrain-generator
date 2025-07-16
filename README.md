@@ -315,5 +315,80 @@ Procedural_Terrain_Generator.zip
 </div>
 
 ## 2 PTG Blender Addon - Documentation
-### ➡ File: \_\_init\_\_.py
-`__init__.py` file serves as the entry point and core configuration file for the "Procedural Terrain Generator" Blender addon
+### └── 📝 \_\_init\_\_.py - Documentation
+  > `__init__.py` file serves as the entry point and core configuration file for the "Procedural Terrain Generator" Blender addon
+
+1. **File Purpose:**
+The `__init__.py` file acts as the primary script that Blender executes to register, enable, and disable the addon. It defines the addon's metadata, registers all necessary classes (operators, UI panels, properties), and handles any setup or cleanup routines.
+
+2. **Addon Information** (`bl_info`)
+The `bl_info` dictionary contains crucial metadata about the addon, which Blender uses to display information in the Addons preferences and manage its lifecycle.
+    - `name`: "Procedural Terrain Generator"
+      - The user-friendly name of the addon displayed in Blender's Addons preferences.
+    - `author`: "Khritish Kumar Behera"
+      - The name of the addon's creator.
+    - `version`: (1, 0)
+      - A tuple representing the addon's version number (major, minor).
+    - `blender`: (3, 0, 0)
+      - The minimum Blender version required for this addon to function correctly.
+    - `location`: "3D View > Sidebar > Terrain Generator Properties"
+      - Indicates where the addon's user interface can be found within Blender. In this case, it's a panel in the 3D Viewport's sidebar.
+    - `description`: "To generate infinite terrain seamlessly using Perlin noise."
+      - A brief description of the addon's primary functionality.
+    - `warning`: ""
+      - An optional field for any warnings or known issues. Currently empty.
+    - `doc_url`: "https://github.com/khritish17/Procedural-3d-terrain-generator/blob/master/README.md"
+      - A URL pointing to the addon's documentation or repository.
+    - `category`: "Mesh"
+      - The category under which the addon will be listed in Blender's Addons preferences, helping users find it.
+3. **Registered Classes** (`classes`)
+The `classes` list enumerates all the Python classes that need to be registered with Blender when the addon is enabled. These classes typically define:
+    - `ui_properties.PTG_Properties`: Custom properties specific to the terrain generator, which will be accessible via Blender's data system.
+    - `ui.PTG_UI`: The user interface panel(s) that will appear in the specified location (3D View > Sidebar).
+    - `operators.PTG_Generate_Operator`: The operator(s) that perform actions, such as generating the terrain.
+4. `register()` Function
+The `register()` function is called by Blender when the addon is enabled. It performs all necessary setup tasks.
+    - `addon_dir = os.path.dirname(bpy.path.abspath(__file__))`:
+      - This line determines the absolute path to the directory where the addon's `__init__.py` file is located. This path is crucial for locating other addon files, such as `util.py`.
+    - `util.check_and_configure(addon_dir)`:
+      - This call invokes a function from the `util` module. Its purpose is to ensure that the necessary environment is set up for the addon, specifically by checking for and configuring the path to the global Python executable. This is often required when an addon depends on external Python libraries (like a noise library) that might not be bundled with Blender's internal Python. The path is typically saved to a file (e.g., `python_exe_path.txt`) for later use.
+    - `for cls in classes: bpy.utils.register_class(cls)`:
+      - This loop iterates through the `classes` list and registers each class with Blender. Registration makes these classes available for use within Blender, allowing their UI elements to appear, operators to be called, and properties to be accessible.
+    - `bpy.types.Scene.ptg_props = bpy.props.PointerProperty(type=ui_properties.PTG_Properties)`:
+      - This line creates a custom pointer property named `ptg_props` on Blender's `Scene` data block. This pointer property is of the type `ui_properties.PTG_Properties`. This allows the addon's custom settings and variables (defined in `PTG_Properties`) to be stored and accessed globally within the Blender scene, making them persistent and editable through the UI.
+5. `unregister()` Function
+The `unregister()` function is called by Blender when the addon is disabled. It's crucial for cleaning up any resources or registrations made by the addon to prevent conflicts or memory leaks.
+    - **Timer Unregistration**:
+
+      ```
+      if ui_properties._update_timer_handle is not None:
+          try:
+              bpy.app.timers.unregister(ui_properties._update_timer_handle)
+              ui_properties._update_timer_handle = None
+              print("-> PTG log: Unregistered terrain update timer")
+          except ValueError:
+              pass
+      ```
+      - This block checks if a timer handle (`_update_timer_handle`) exists, which is likely used for periodically updating the terrain (e.g., when properties change). If it exists, the timer is unregistered from Blender's application timers to stop its execution. The `try-except` block handles cases where the timer might have already been unregistered or is invalid, preventing errors during cleanup.
+    - **Property Deletion**:
+    
+      ```
+      if hasattr(bpy.types.Scene, 'ptg_props'):
+      	del bpy.types.Scene.ptg_props
+      ```
+      - This checks if the custom `ptg_props` pointer property was successfully added to the `Scene` data block. If it exists, it is deleted, removing the addon's custom properties from the scene.
+
+    - **Class Unregistration**:
+      ```
+      for cls in reversed(classes):
+          bpy.utils.unregister_class(cls)
+      ```
+      - This loop iterates through the `classes` list in reverse order and unregisters each class from Blender. Unregistering in reverse order is a common practice to ensure that dependencies are correctly handled (e.g., UI panels that might rely on properties are unregistered before the properties themselves). This removes the addon's UI elements, operators, and property definitions from Blender.
+6. **Conclusion**
+The `__init__.py` file is the backbone of the "Procedural Terrain Generator" addon, orchestrating its integration with Blender. It provides essential metadata, registers all functional components, and manages the addon's lifecycle by handling both setup (`register`) and cleanup (`unregister`) operations.
+
+### └── 📝 util.py - Documentation
+### └── 📝 ui.py - Documentation
+### └── 📝 ui_properties.py - Documentation
+### └── 📝 operators.py - Documentation
+### └── 📝 perlin_height_map.py - Documentation
