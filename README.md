@@ -298,4 +298,15 @@ It aims to procedurally generate a realistic-looking 3D terrain. By combining mu
 <img src ="Images/terrain_3d.png" width = "1500">
 
 # Documentation
-
+## 1 PTG Blender Addon - Structure
+```
+Procedural_Terrain_Generator.zip
+└── Procedural_Terrain_Generator/
+    └── init.py
+    └── operators.py
+    └── perlin_height_map.py
+    └── python_exe_path.txt
+    └── ui.py
+    └── ui_properties.py
+    └── util.py
+```
