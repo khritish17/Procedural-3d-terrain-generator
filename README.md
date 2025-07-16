@@ -302,7 +302,7 @@ It aims to procedurally generate a realistic-looking 3D terrain. By combining mu
 ```
 Procedural_Terrain_Generator.zip
 └── Procedural_Terrain_Generator/
-    └── init.py
+    └── __init__.py
     └── operators.py
     └── perlin_height_map.py
     └── python_exe_path.txt
@@ -310,3 +310,10 @@ Procedural_Terrain_Generator.zip
     └── ui_properties.py
     └── util.py
 ```
+<div align="center">
+<img src ="https://github.com/khritish17/Procedural-3d-terrain-generator/blob/master/PTG_HLD_LLD.png" height = "500">
+</div>
+
+## 2 PTG Blender Addon - Documentation
+### ➡ File: \_\_init\_\_.py
+`__init__.py` file serves as the entry point and core configuration file for the "Procedural Terrain Generator" Blender addon
