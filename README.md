@@ -488,6 +488,7 @@ ___
 
 3. **Conclusion**
 The `ui.py` file is crucial for providing an intuitive and organized interface for the "Procedural Terrain Generator" addon. By defining the `PTG_UI` panel and its `draw` method, it exposes all the necessary parameters and actions to the user within Blender's 3D Viewport, enabling easy customization and generation of terrains.
+
 ### └── 📝 ui_properties.py - Documentation
 ___
 `ui_properties.py` file defines the custom properties and the update logic for the "Procedural Terrain Generator" Blender addon.
@@ -562,205 +563,109 @@ ___
 		- `precision`: (For `FloatProperty`) The number of decimal places displayed.
 		- `update`: (`function`) A callback function that is executed whenever the property's value changes. In this case, `update_terrain_mesh_debounced` is used for most properties to trigger terrain regeneration.
 
-4.2. Terrain Dimension / Offsets Properties
-These properties control the size and position of the generated terrain.
-
-terrain_length: (bpy.props.IntProperty)
-
-Name: "Terrain Length"
-
-Description: Number of vertices along the X-axis.
-
-Default: 100
-
-Range: 2 to 1000
-
-terrain_width: (bpy.props.IntProperty)
-
-Name: "Terrain Width"
-
-Description: Number of vertices along the Y-axis.
-
-Default: 100
-
-Range: 2 to 1000
-
-offset_x: (bpy.props.FloatProperty)
-
-Name: "Offset X"
-
-Description: Shifts the noise pattern horizontally (along X-axis) to generate different sections of the 'infinite' noise landscape.
-
-Default: 0.0
-
-Range: -10000.0 to 10000.0
-
-Update Callback: update_terrain_mesh_debounced
-
-offset_y: (bpy.props.FloatProperty)
-
-Name: "Offset Y"
-
-Description: Shifts the noise pattern vertically (along Y-axis).
-
-Default: 0.0
-
-Range: -10000.0 to 10000.0
-
-Update Callback: update_terrain_mesh_debounced
-
-4.3. Terrain Base Noise Properties
-These properties control the parameters of the primary Perlin noise used to define the overall shape of the terrain.
-
-terrain_seed: (bpy.props.IntProperty)
-
-Name: "Terrain Seed"
-
-Description: An integer seed for reproducible noise patterns.
-
-Default: 0
-
-Range: -100000 to 100000
-
-Update Callback: update_terrain_mesh_debounced
-
-terrain_scale: (bpy.props.FloatProperty)
-
-Name: "Terrain Scale"
-
-Description: Controls the zoom level of noise features. Larger values mean larger, smoother features; smaller values mean smaller, more jagged details.
-
-Default: 100.0
-
-Range: 1.0 to 1000.0
-
-Update Callback: update_terrain_mesh_debounced
-
-terrain_octaves: (bpy.props.IntProperty)
-
-Name: "Terrain Octaves"
-
-Description: The number of noise layers (fractal sum) to add detail. Higher values add more detail but increase computational cost.
-
-Default: 6
-
-Range: 1 to 10
-
-Update Callback: update_terrain_mesh_debounced
-
-terrain_persistence: (bpy.props.FloatProperty)
-
-Name: "Terrain Persistence"
-
-Description: How much each successive octave contributes to amplitude (roughness). 0.5 is common for fractal Brownian motion (fBm).
-
-Default: 0.5
-
-Range: 0.0 to 1.0
-
-Update Callback: update_terrain_mesh_debounced
-
-terrain_lacunarity: (bpy.props.FloatProperty)
-
-Name: "Terrain Lacunarity"
-
-Description: How much the frequency of each successive octave increases. 2.0 is common for fractal-like appearance.
-
-Default: 2.0
-
-Range: 1.0 to 3.5
-
-Update Callback: update_terrain_mesh_debounced
-
-4.4. Terrain Height Properties (Height Modulation)
-These properties control a secondary Perlin noise layer used to modulate the height of the terrain, adding more complexity.
-
-height_seed: (bpy.props.IntProperty)
-
-Name: "Height Seed"
-
-Description: An integer seed for the height modulation noise.
-
-Default: 0
-
-Range: -100000 to 100000
-
-Update Callback: update_terrain_mesh_debounced
-
-height_scale: (bpy.props.FloatProperty)
-
-Name: "Height Scale"
-
-Description: Zoom level for height modulation noise features.
-
-Default: 100.0
-
-Range: 1.0 to 1000.0
-
-Update Callback: update_terrain_mesh_debounced
-
-height_octaves: (bpy.props.IntProperty)
-
-Name: "Height Octaves"
-
-Description: Number of noise layers for height modulation.
-
-Default: 6
-
-Range: 1 to 10
-
-Update Callback: update_terrain_mesh_debounced
-
-height_persistence: (bpy.props.FloatProperty)
-
-Name: "Height Persistence"
-
-Description: Amplitude contribution of successive octaves for height modulation.
-
-Default: 0.5
-
-Range: 0.0 to 1.0
-
-Update Callback: update_terrain_mesh_debounced
-
-height_lacunarity: (bpy.props.FloatProperty)
-
-Name: "Height Lacunarity"
-
-Description: Frequency increase of successive octaves for height modulation.
-
-Default: 2.0
-
-Range: 1.0 to 3.5
-
-Update Callback: update_terrain_mesh_debounced
-
-min_height: (bpy.props.FloatProperty)
-
-Name: "Min Height"
-
-Description: The absolute minimum height of the generated terrain mesh.
-
-Default: 10.0
-
-Range: -1000.0 to 1000.0
-
-Update Callback: update_terrain_mesh_debounced
-
-max_height: (bpy.props.FloatProperty)
-
-Name: "Max Height"
-
-Description: The absolute maximum height of the generated terrain mesh.
-
-Default: 100.0
-
-Range: -1000.0 to 1000.0
-
-Update Callback: update_terrain_mesh_debounced
-
-5. Conclusion
-The ui_properties.py file is fundamental to the interactivity and configurability of the "Procedural Terrain Generator" addon. By defining a comprehensive set of custom properties and implementing an efficient debouncing mechanism, it allows users to dynamically adjust terrain parameters and see the results updated in real-time within Blender, without performance bottlenecks.
+	- **Terrain Dimension / Offsets Properties**: These properties control the size and position of the generated terrain.
+		- `terrain_length`: (`bpy.props.IntProperty`)
+			- **Name**: "Terrain Length"
+			- **Description**: Number of vertices along the X-axis.
+			- **Default**: `100`
+			- **Range**: `2` to `1000`
+		- `terrain_width`: (`bpy.props.IntProperty`)
+			- **Name**: "Terrain Width"
+			- **Description**: Number of vertices along the Y-axis.
+			- **Default**: `100`
+			- **Range**: `2` to `1000`
+		- `offset_x`: (`bpy.props.FloatProperty`)
+			- Name: "Offset X"
+			- Description: Shifts the noise pattern horizontally (along X-axis) to generate different sections of the 'infinite' noise landscape.
+			- Default: `0.0`
+			- Range: `-10000.0` to `10000.0`
+			- Update Callback: `update_terrain_mesh_debounced`
+		- `offset_y`: (`bpy.props.FloatProperty`)
+			- **Name**: "Offset Y"
+			- **Description**: Shifts the noise pattern vertically (along Y-axis).
+			- **Default**: `0.0`
+			- **Range**: `-10000.0` to `10000.0`
+			- **Update Callback**: `update_terrain_mesh_debounced`
+
+	- **Terrain Base Noise Properties**: These properties control the parameters of the primary Perlin noise used to define the overall shape of the terrain.
+		- `terrain_seed`: (`bpy.props.IntProperty`)
+			- **Name**: "Terrain Seed"
+			- **Description**: An integer seed for reproducible noise patterns.
+			- **Default**: `0`
+			- **Range**: `-100000` to `100000`
+			- **Update Callback**: `update_terrain_mesh_debounced`
+		- `terrain_scale`: (`bpy.props.FloatProperty`)
+			- **Name**: "Terrain Scale"
+			- **Description**: Controls the zoom level of noise features. Larger values mean larger, smoother features; smaller values mean smaller, more jagged details.
+			- **Default**: `100.0`
+			- **Range**: `1.0` to `1000.0`
+			- **Update Callback**: `update_terrain_mesh_debounced`
+		- `terrain_octaves`: (`bpy.props.IntProperty`)
+			- **Name**: "Terrain Octaves"
+			- **Description**: The number of noise layers (fractal sum) to add detail. Higher values add more detail but increase computational cost.
+			- **Default**: `6`
+			- **Range**: `1` to `10`
+			- **Update Callback**: `update_terrain_mesh_debounced`
+
+		- `terrain_persistence`: (`bpy.props.FloatProperty`)
+			- **Name**: "Terrain Persistence"
+			- **Description**: How much each successive octave contributes to amplitude (roughness). 0.5 is common for fractal Brownian motion (fBm).
+			- **Default**: `0.5`
+			- **Range**: `0.0` to `1.0`
+			- **Update Callback**: `update_terrain_mesh_debounced`
+		- `terrain_lacunarity`: (`bpy.props.FloatProperty`)
+			- **Name**: "Terrain Lacunarity"
+			- **Description**: How much the frequency of each successive octave increases. 2.0 is common for fractal-like appearance.
+			- **Default**: `2.0`
+			- **Range**: `1.0` to `3.5`
+			- **Update Callback**: `update_terrain_mesh_debounced`
+
+	- **Terrain Height Properties (Height Modulation)**: These properties control a secondary Perlin noise layer used to modulate the height of the terrain, adding more complexity.
+		- `height_seed`: (`bpy.props.IntProperty`)
+			- **Name**: "Height Seed"
+			- **Description**: An integer seed for the height modulation noise.
+			- **Default**: `0`
+			- **Range**: `-100000` to `100000`
+			- **Update Callback**: update_terrain_mesh_debounced
+		- `height_scale`: (`bpy.props.FloatProperty`)
+			- **Name**: "Height Scale"
+			- **Description**: Zoom level for height modulation noise features.
+			- **Default**: `100.0`
+			- **Range**: `1.0` to `1000.0`
+			- **Update Callback**: `update_terrain_mesh_debounced`
+		- `height_octaves`: (`bpy.props.IntProperty`)
+			- **Name**: "Height Octaves"
+			- **Description**: Number of noise layers for height modulation.
+			- **Default**: `6`
+			- **Range**: `1` to `10`
+			- **Update Callback**: `update_terrain_mesh_debounced`
+		- `height_persistence`: (`bpy.props.FloatProperty`)
+			- **Name**: "Height Persistence"
+			- **Description**: Amplitude contribution of successive octaves for height modulation.
+			- **Default**: `0.5`
+			- **Range**: `0.0` to `1.0`
+			- **Update Callback**: `update_terrain_mesh_debounced`
+		- `height_lacunarity`: (`bpy.props.FloatProperty`)
+			- **Name**: "Height Lacunarity"
+			- **Description**: Frequency increase of successive octaves for height modulation.
+			- **Default**: `2.0`
+			- **Range**: `1.0` to `3.5`
+			- **Update Callback**: `update_terrain_mesh_debounced`
+		- `min_height`: (`bpy.props.FloatProperty`)
+			- **Name**: "Min Height"
+			- **Description**: The absolute minimum height of the generated terrain mesh.
+			- **Default**: `10.0`
+			- **Range**: `-1000.0` to `1000.0`
+			- **Update Callback**: `update_terrain_mesh_debounced`
+		- `max_height`: (`bpy.props.FloatProperty`)
+			- **Name**: "Max Height"
+			- **Description**: The absolute maximum height of the generated terrain mesh.
+			- **Default**: `100.0`
+			- **Range**: `-1000.0` to `1000.0`
+			- **Update Callback**: `update_terrain_mesh_debounced`
+
+5. **Conclusion**
+The `ui_properties.py` file is fundamental to the interactivity and configurability of the "Procedural Terrain Generator" addon. By defining a comprehensive set of custom properties and implementing an efficient debouncing mechanism, it allows users to dynamically adjust terrain parameters and see the results updated in real-time within Blender, without performance bottlenecks.
 ### └── 📝 operators.py - Documentation
 ___
 ### └── 📝 perlin_height_map.py - Documentation
