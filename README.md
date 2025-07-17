@@ -490,6 +490,277 @@ ___
 The `ui.py` file is crucial for providing an intuitive and organized interface for the "Procedural Terrain Generator" addon. By defining the `PTG_UI` panel and its `draw` method, it exposes all the necessary parameters and actions to the user within Blender's 3D Viewport, enabling easy customization and generation of terrains.
 ### └── 📝 ui_properties.py - Documentation
 ___
+`ui_properties.py` file defines the custom properties and the update logic for the "Procedural Terrain Generator" Blender addon.
+
+1. **File Purpose**
+	- The `ui_properties.py` file is central to managing the data and user-driven updates for the terrain generator. It defines a `PropertyGroup` to hold all the configurable parameters for terrain generation (like dimensions, noise seeds, scales, etc.). Crucially, it also implements a debounced update mechanism, ensuring that changes to these properties automatically trigger a regeneration of the terrain mesh without excessive calls to the generation operator.
+
+2. **Global Variable:** `_update_timer_handle`
+	- `_update_timer_handle = None`:
+		- This global variable is used to store the handle of a Blender application timer. This timer is essential for implementing debouncing. When a property linked to `update_terrain_mesh_debounced` is changed, a timer is set. If another property is changed before the timer fires, the old timer is unregistered and a new one is set. This prevents the terrain from regenerating immediately and repeatedly with every small adjustment, improving performance and user experience. It's initialized to `None` to indicate no active timer.
+
+3. **Function:** `update_terrain_mesh_debounced(self, context)`
+	- This function serves as a callback for property updates. It implements a debouncing mechanism to prevent the terrain mesh from being regenerated too frequently when multiple properties are adjusted in quick succession.
+	- **Parameters**:
+		- `self`: The instance of the `PropertyGroup` (`PTG_Properties`) that triggered the update.
+		- `context`: A `bpy.context` object, providing access to Blender's current state.
+	- **Functionality**:
+		1. **Clear Existing Timer:**
+  			```
+  			global _update_timer_handle
+			if _update_timer_handle is not None:
+    			try:
+        			bpy.app.timers.unregister(_update_timer_handle)
+        			_update_timer_handle = None
+    			except ValueError:
+        			_update_timer_handle = None
+			```
+			- This block first accesses the global `_update_timer_handle`.
+			- If an existing timer is active, it attempts to unregister it. This is the core of debouncing: any previous pending update is cancelled.
+			- A `try-except ValueError` is used to gracefully handle cases where the timer might have already fired or been unregistered, preventing errors.
+
+		2. **Check for Existing Terrain Object**:
+			```
+			if "PTG_Terrain_object" in bpy.data.objects and bpy.data.objects["PTG_Terrain_object"].type == 'MESH':
+			```
+			- This condition checks if an object named "PTG_Terrain_object" exists in the scene and if it is a mesh type. This ensures that the terrain generation is only triggered if there's an existing terrain object to update.
+
+		3. **Define Inner Update Function:**
+			```
+			def update_terrain_mesh():
+    				print("UPdate trigred in ui_properties")
+    				bpy.ops.ptg.generate_terrain('INVOKE_DEFAULT')
+    				global _update_timer_handle
+    				_update_timer_handle = None
+    				return None
+   			```
+			- An inner function `update_terrain_mesh` is defined. This function contains the actual logic to be executed after the debounce delay.
+			- It prints a log message.
+			- `bpy.ops.ptg.generate_terrain('INVOKE_DEFAULT')`: This is the crucial line that calls the terrain generation operator. 'INVOKE_DEFAULT' ensures the operator runs with its default invocation context.
+			- It resets `_update_timer_handle` to `None` after the update is triggered, indicating that the timer has fired.
+
+		4. **Register New Timer:**
+			```
+			_update_timer_handle = bpy.app.timers.register(update_terrain_mesh, first_interval=0.05)
+			```
+			- A new timer is registered with Blender's application timers.
+			- `update_terrain_mesh`: The function to be called when the timer expires.
+			- `first_interval=0.05`: The delay in seconds before the `update_terrain_mesh` function is called. This short delay allows for multiple property changes to occur before a single terrain regeneration is triggered.
+
+	- **Purpose**: To provide a smooth and efficient user experience by preventing constant, immediate terrain regeneration while a user is adjusting multiple parameters.
+
+4. Class: **PTG_Properties**
+	- The `PTG_Properties` class inherits from `bpy.types.PropertyGroup`. This class is a container for all the custom properties that will be exposed in the addon's UI panel. Each property is defined using Blender's property types (`IntProperty`, `FloatProperty`) and includes metadata like name, description, default values, min/max ranges, and importantly, an `update` callback.
+
+	- **General Property Attributes**: Each property typically includes:
+		- `name`: (`str`) The label displayed next to the property in the UI.
+		- `description`: (`str`) A tooltip that appears when the user hovers over the property in the UI. It provides detailed information about the property's purpose and effect.
+		- `default`: The initial value of the property.
+		- `min`: The minimum allowed value for the property.
+		- `max`: The maximum allowed value for the property.
+		- `step`: (For `FloatProperty`) The increment/decrement step when dragging the slider or using arrow keys.
+		- `precision`: (For `FloatProperty`) The number of decimal places displayed.
+		- `update`: (`function`) A callback function that is executed whenever the property's value changes. In this case, `update_terrain_mesh_debounced` is used for most properties to trigger terrain regeneration.
+
+4.2. Terrain Dimension / Offsets Properties
+These properties control the size and position of the generated terrain.
+
+terrain_length: (bpy.props.IntProperty)
+
+Name: "Terrain Length"
+
+Description: Number of vertices along the X-axis.
+
+Default: 100
+
+Range: 2 to 1000
+
+terrain_width: (bpy.props.IntProperty)
+
+Name: "Terrain Width"
+
+Description: Number of vertices along the Y-axis.
+
+Default: 100
+
+Range: 2 to 1000
+
+offset_x: (bpy.props.FloatProperty)
+
+Name: "Offset X"
+
+Description: Shifts the noise pattern horizontally (along X-axis) to generate different sections of the 'infinite' noise landscape.
+
+Default: 0.0
+
+Range: -10000.0 to 10000.0
+
+Update Callback: update_terrain_mesh_debounced
+
+offset_y: (bpy.props.FloatProperty)
+
+Name: "Offset Y"
+
+Description: Shifts the noise pattern vertically (along Y-axis).
+
+Default: 0.0
+
+Range: -10000.0 to 10000.0
+
+Update Callback: update_terrain_mesh_debounced
+
+4.3. Terrain Base Noise Properties
+These properties control the parameters of the primary Perlin noise used to define the overall shape of the terrain.
+
+terrain_seed: (bpy.props.IntProperty)
+
+Name: "Terrain Seed"
+
+Description: An integer seed for reproducible noise patterns.
+
+Default: 0
+
+Range: -100000 to 100000
+
+Update Callback: update_terrain_mesh_debounced
+
+terrain_scale: (bpy.props.FloatProperty)
+
+Name: "Terrain Scale"
+
+Description: Controls the zoom level of noise features. Larger values mean larger, smoother features; smaller values mean smaller, more jagged details.
+
+Default: 100.0
+
+Range: 1.0 to 1000.0
+
+Update Callback: update_terrain_mesh_debounced
+
+terrain_octaves: (bpy.props.IntProperty)
+
+Name: "Terrain Octaves"
+
+Description: The number of noise layers (fractal sum) to add detail. Higher values add more detail but increase computational cost.
+
+Default: 6
+
+Range: 1 to 10
+
+Update Callback: update_terrain_mesh_debounced
+
+terrain_persistence: (bpy.props.FloatProperty)
+
+Name: "Terrain Persistence"
+
+Description: How much each successive octave contributes to amplitude (roughness). 0.5 is common for fractal Brownian motion (fBm).
+
+Default: 0.5
+
+Range: 0.0 to 1.0
+
+Update Callback: update_terrain_mesh_debounced
+
+terrain_lacunarity: (bpy.props.FloatProperty)
+
+Name: "Terrain Lacunarity"
+
+Description: How much the frequency of each successive octave increases. 2.0 is common for fractal-like appearance.
+
+Default: 2.0
+
+Range: 1.0 to 3.5
+
+Update Callback: update_terrain_mesh_debounced
+
+4.4. Terrain Height Properties (Height Modulation)
+These properties control a secondary Perlin noise layer used to modulate the height of the terrain, adding more complexity.
+
+height_seed: (bpy.props.IntProperty)
+
+Name: "Height Seed"
+
+Description: An integer seed for the height modulation noise.
+
+Default: 0
+
+Range: -100000 to 100000
+
+Update Callback: update_terrain_mesh_debounced
+
+height_scale: (bpy.props.FloatProperty)
+
+Name: "Height Scale"
+
+Description: Zoom level for height modulation noise features.
+
+Default: 100.0
+
+Range: 1.0 to 1000.0
+
+Update Callback: update_terrain_mesh_debounced
+
+height_octaves: (bpy.props.IntProperty)
+
+Name: "Height Octaves"
+
+Description: Number of noise layers for height modulation.
+
+Default: 6
+
+Range: 1 to 10
+
+Update Callback: update_terrain_mesh_debounced
+
+height_persistence: (bpy.props.FloatProperty)
+
+Name: "Height Persistence"
+
+Description: Amplitude contribution of successive octaves for height modulation.
+
+Default: 0.5
+
+Range: 0.0 to 1.0
+
+Update Callback: update_terrain_mesh_debounced
+
+height_lacunarity: (bpy.props.FloatProperty)
+
+Name: "Height Lacunarity"
+
+Description: Frequency increase of successive octaves for height modulation.
+
+Default: 2.0
+
+Range: 1.0 to 3.5
+
+Update Callback: update_terrain_mesh_debounced
+
+min_height: (bpy.props.FloatProperty)
+
+Name: "Min Height"
+
+Description: The absolute minimum height of the generated terrain mesh.
+
+Default: 10.0
+
+Range: -1000.0 to 1000.0
+
+Update Callback: update_terrain_mesh_debounced
+
+max_height: (bpy.props.FloatProperty)
+
+Name: "Max Height"
+
+Description: The absolute maximum height of the generated terrain mesh.
+
+Default: 100.0
+
+Range: -1000.0 to 1000.0
+
+Update Callback: update_terrain_mesh_debounced
+
+5. Conclusion
+The ui_properties.py file is fundamental to the interactivity and configurability of the "Procedural Terrain Generator" addon. By defining a comprehensive set of custom properties and implementing an efficient debouncing mechanism, it allows users to dynamically adjust terrain parameters and see the results updated in real-time within Blender, without performance bottlenecks.
 ### └── 📝 operators.py - Documentation
 ___
 ### └── 📝 perlin_height_map.py - Documentation
