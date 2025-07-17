@@ -783,3 +783,94 @@ The `operators.py` file is the operational core of the "Procedural Terrain Gener
 
 ### └── 📝 perlin_height_map.py - Documentation
 ___
+`perlin_height_map.py` file is a standalone Python script designed to generate 2D Perlin noise height maps. This script is intended for Inter-Process Communication (IPC), meaning it's executed by another process (in this case, the Blender addon's operators.py) to perform its computation and return results via standard output.
+
+1. **File Purpose**
+	- The primary purpose of `perlin_height_map.py` is to compute a 2D height map using a composite Perlin noise algorithm. It receives configuration parameters as a JSON string via command-line arguments, performs the noise calculation, and then outputs the resulting height map (as a flattened list) to standard output in JSON format. This design allows the Blender addon to leverage external Python libraries (like `noise` and `numpy`) without needing to bundle them directly within Blender's Python environment.
+
+2. **Class:** `Perlin_Height_Map`
+This class encapsulates the logic for generating a 2D Perlin noise height map based on various parameters.
+	- 1. `__init__(self, view_height=100, view_width=100)`: The constructor initializes the Perlin_Height_Map instance with default values for all terrain and height noise parameters.
+		- **Parameters:**
+			- `view_height` (`int`, optional): The height (number of rows) of the generated height map. Defaults to 100.
+			- `view_width` (`int`, optional): The width (number of columns) of the generated height map. Defaults to 100.
+		- **Functionality:**
+			- Sets the `self.shape` tuple to `(view_height, view_width)`.
+			- Initializes `self.offset` to `(0, 0)`.
+			- Initializes all Perlin noise parameters (scale, octaves, persistence, lacunarity, seed) for both the base terrain noise and the height modulation noise with default values.
+			- Initializes `min_height` and `max_height` for the final height scaling.
+		- **Internal Documentation (within code)**: The docstring for the `__init__` method provides a good summary of what each Perlin noise parameter means: `shape`, `scale`, `octaves`, `persistence`, `lacunarity`, and `seed`.
+	- 2. `set_parameters(self, ...)`: This method allows external callers to update all the Perlin noise and terrain dimension parameters after the object has been initialized.
+		- **Parameters:**
+			- `view_height` (`int`): Height of the terrain map.
+			- `view_width` (`int`): Width of the terrain map.
+			- `terrain_scale` (`float`): Scale for the base terrain noise.
+			- `terrain_octaves` (`int`): Number of octaves for base terrain noise.
+			- `terrain_persistence` (`float`): Persistence for base terrain noise.
+			- `terrain_lacunarity` (`float`): Lacunarity for base terrain noise.
+			- `terrain_seed` (`int`): Seed for base terrain noise.
+			- `offset_x` (`float`): X-offset for the noise sampling.
+			- `offset_y` (`float`): Y-offset for the noise sampling.
+			- `height_scale` (`float`): Scale for the height modulation noise.
+			- `height_octaves` (`int`): Number of octaves for height modulation noise.
+			- `height_persistence` (`float`): Persistence for height modulation noise.
+			- `height_lacunarity` (`float`): Lacunarity for height modulation noise.
+			- `height_seed` (`int`): Seed for height modulation noise.
+			- `min_height` (`float`): Minimum final height of the terrain.
+			- `max_height` (`float`): Maximum final height of the terrain.
+		- **Functionality:**
+			- Updates the instance attributes (`self.shape`, `self.offset`, `self.terrain_scale`, etc.) with the provided parameter values. This method is crucial for configuring the noise generation based on user input from the Blender addon.
+	- 3. `generate_terrain_map(self)`: This method computes the 2D height map using a combination of two Perlin noise layers: a base terrain noise and a height modulation noise.
+		- **Returns**:
+			- `numpy.ndarray`: A 2D NumPy array representing the generated height map, with values scaled between `min_height` and `max_height`.
+		- **Functionality:**
+			- Initialize Viewport Array: Creates a NumPy array `view_port` filled with zeros, with dimensions defined by `self.shape`. This array will store the computed height values.
+			- **Iterate Through Grid:** Uses nested loops to iterate over each `(x, y)` coordinate in the `view_port` grid.
+			- **Calculate Normalized Coordinates:**
+				- `new_x = (x + self.offset[0]) / self.terrain_scale`
+				- `new_y = (y + self.offset[1]) / self.terrain_scale`
+				- These calculations normalize the `(x, y)` coordinates by the `terrain_scale` and apply the `offset`. This ensures that the noise function samples different parts of the infinite Perlin noise field, allowing for seamless, continuous terrain generation as offsets change.
+			- **Generate Base Perlin Noise:**
+				- `base_noise = noise.snoise2(...)`: Calls the `noise.snoise2` function (from the `noise` library) to generate 2D Perlin noise for the base terrain.
+				- It uses `self.terrain_octaves`, `self.terrain_persistence`, `self.terrain_lacunarity`, and `self.terrain_seed` for its parameters.
+				- `repeatx` and `repeaty` are set to `self.shape[0]` and `self.shape[1]` respectively, which can be useful for wrapping noise patterns, though for infinite terrain, the primary control is `offset`.
+			- **Generate Height Modulation Perlin Noise:**
+				- `height_noise = noise.snoise2(...)`: Generates a second layer of 2D Perlin noise, specifically for modulating the height.
+				- It uses `self.height_octaves`, `self.height_persistence`, `self.height_lacunarity`, and `self.height_seed` for its parameters.
+			- **Normalize Height Noise:**
+				- `normalized_height_noise = (height_noise + 1)/2`: Perlin noise typically returns values in the range [-1, 1]. This line normalizes the height_noise to the range [0, 1].
+			- **Modulate Base Noise:**
+				- `modulated_height = base_noise * normalized_height_noise`: The base terrain noise is multiplied by the normalized height modulation noise. This allows the second noise layer to influence the amplitude (height) of the first, creating more varied and complex terrain features (e.g., higher mountains in certain areas, flatter plains in others).
+			- **Linear Interpolation for Final Height:**
+				- `height = self.min_height + (modulated_height + 1) * ((self.max_height - self.min_height)/2)`: This is a linear interpolation (lerp) formula. The `modulated_height` (which is still in `[-1, 1]` range after modulation, assuming `normalized_height_noise` is `[0,1]`) is mapped to the desired `[min_height, max_height]` range.
+			- **Store Height:** The calculated `height` is assigned to the corresponding `(x, y)` position in the `view_port` array.
+			- **Return Height Map**: Returns the fully populated `view_port` NumPy array.
+
+3. **Function:** `perlin_height_map_api(json_param)`
+	- This function serves as the main entry point for external calls to this script, particularly from the Blender addon. It parses input parameters and orchestrates the height map generation.
+	- **Parameters:**
+		- `json_param` (`str` or `None`): A JSON string containing all the parameters for terrain generation. If `None`, default parameters will be used.
+	- **Returns:**
+		- `list`: A flattened list of the generated height map values. This format is suitable for easy transfer via standard output to the calling process.
+	- **Functionality:**
+		- **Instantiate** `Perlin_Height_Map`: Creates an instance of the `Perlin_Height_Map` class.
+		- **Parse Parameters:**
+			- If json_param is provided (not None), it parses the JSON string into a Python dictionary.
+			- It then extracts each parameter from the dictionary and calls `PHM.set_parameters()` to configure the `Perlin_Height_Map` instance with these values.
+		- **Generate Height Map:** Calls `PHM.generate_terrain_map()` to compute the 2D height map.
+		- **Flatten and Return:** Flattens the resulting 2D NumPy array into a 1D list using `.flatten().tolist()` and returns it.
+
+4. **Main Execution Block** (`if __name__ == "__main__":`)
+This block is executed when the perlin_height_map.py script is run directly (e.g., via `python perlin_height_map.py`). It handles command-line arguments and outputs the result.
+	- **Functionality:**
+		- **Check Command-Line Arguments:**
+			- `if len(sys.argv) > 1:`: Checks if any command-line arguments were provided. The first argument (`sys.argv[0]`) is always the script name itself.
+			- If arguments exist, `sys.argv[1]` (the first actual argument) is assumed to be the JSON string of parameters.
+			- If no arguments are provided, `json_param` is set to `None`, causing `perlin_height_map_api` to use default parameters.
+		- **Call API Function:** Calls `perlin_height_map_api()` with the determined `json_param`.
+		- **Output Result:**
+			- `print(json.dumps(height_list))`: Converts the returned flattened height map list back into a JSON string and prints it to standard output. This is how the `operators.py` script in Blender receives the data.
+		- **Error Handling:** Includes a `try-except` block to catch any exceptions during the process, print an error message to standard error, and exit with a non-zero status code (indicating failure).
+
+5. **Conclusion**
+The `perlin_height_map.py` script is a crucial component of the "Procedural Terrain Generator" addon, acting as a dedicated, external service for complex Perlin noise computations. Its design for IPC allows the addon to remain lightweight while leveraging powerful Python libraries for mathematical operations, ensuring efficient and customizable terrain generation.
