@@ -666,7 +666,120 @@ ___
 
 5. **Conclusion**
 The `ui_properties.py` file is fundamental to the interactivity and configurability of the "Procedural Terrain Generator" addon. By defining a comprehensive set of custom properties and implementing an efficient debouncing mechanism, it allows users to dynamically adjust terrain parameters and see the results updated in real-time within Blender, without performance bottlenecks.
+
 ### └── 📝 operators.py - Documentation
 ___
+`operators.py` file contains the core logic for generating the procedural terrain mesh within the Blender addon. It defines a class for handling terrain mesh creation and an operator that integrates this functionality into Blender's UI.
+
+1. **File Purpose**
+	- The `operators.py` file is responsible for the heavy lifting of the "Procedural Terrain Generator" addon. It orchestrates the process of:
+		- Retrieving the global Python executable path.
+		- Communicating with an external Python script (perlin_height_map.py) to compute the terrain's height map using Perlin noise.
+		- Constructing or updating a Blender mesh object based on the generated height map.
+		- Defining a Blender operator that users can trigger from the UI to initiate terrain generation.
+
+2. **Class**: `PTG_Generate_Terrain_Mesh`: This class encapsulates the functionality related to generating and manipulating the terrain mesh.
+	1. `__init__(self, addon_dir)`: The constructor initializes the `PTG_Generate_Terrain_Mesh` instance.
+		- **Parameters**:
+			- `addon_dir` (`str`): The absolute path to the addon's directory.
+		- **Functionality**:
+			- Stores the `addon_dir`.
+			- Calls `self.get_python_exe()` to retrieve the path to the global Python executable, storing it in self.PYTHON_EXE. This path is crucial for running the external Perlin noise script.
+			- Constructs the full path to the `perlin_height_map.py` script, storing it in `self.PERLIN_FILE`.
+	2. `get_python_exe(self)`: This method reads the path to the global Python executable from a text file (python_exe_path.txt) located in the addon's directory. This file is expected to have been created and configured by the util.py module during addon registration.
+		- **Returns**:
+			- `str`: The path to the Python executable.
+			- `None`: If the `python_exe_path.txt` file cannot be found or read, indicating an error in initialization.
+		- **Functionality**:
+			- Constructs the full path to `python_exe_path.txt`.
+			- Attempts to open and read the first line from this file.
+			- Strips any newline characters from the read path.
+			- Includes basic error handling to catch `IOError` or other exceptions if the file is missing or unreadable, printing an error message to the console.
+	3. `terrain_mesh_generator(self, height_map_array, obj_name="PTG_Terrain_object")`: This method is responsible for creating or updating a 3D mesh object in Blender based on a 2D NumPy array representing a height map.
+		- **Parameters**:
+			- `height_map_array (numpy.ndarray)`: A 2D NumPy array where each element represents the Z-coordinate (height) of a vertex.
+			- `obj_name` (`str`, optional): The desired name for the Blender mesh object. Defaults to `"PTG_Terrain_object"`.
+		- **Returns**:
+			- `bpy.types.Object`: The generated or updated Blender mesh object.
+			- `None`: If an invalid `height_map_array` is provided.
+		- **Functionality**:
+			- **Input Validation**: Checks if `height_map_array` is a valid 2D NumPy array.
+			- **Determine Dimensions**: Extracts the number of vertices along X and Y from the `height_map_array`'s shape.
+			- **Generate Vertices**:
+				- Iterates through the dimensions to create a list of `(x, y, z)` tuples for each vertex. The `z` coordinate is taken directly from the `height_map_array`.
+			- **Generate Faces**:
+				- Iterates through the grid of vertices to create quadrilateral faces. Each quadrilateral is triangulated into two triangles to form the mesh. The indices of the vertices are calculated based on their position in the grid.
+			- **Retrieve or Create Mesh Object**:
+				- Checks if an object with `obj_name` already exists in the scene and is a mesh.
+					- If it exists, it retrieves its mesh data for an update.
+					- If it does not exist, it creates a new `bpy.data.meshes` object and a new `bpy.data.objects` (mesh object), then links it to the current collection.
+			- **Switch to Object Mode**: Ensures Blender is in 'OBJECT' mode before modifying mesh data, which is a common requirement for mesh operations.
+			- **Clear and Update Mesh Data**:
+				- `mesh_data.clear_geometry()`: Clears any existing vertex, edge, and face data from the mesh.
+				- `mesh_data.from_pydata(vertices, [], faces)`: Populates the mesh with the newly generated vertices and faces. Edges are automatically calculated.
+				- `mesh_data.update(calc_edges=True)`: Updates the mesh data, recalculating edges.
+				- `mesh_data.validate()`: Validates the mesh data for consistency.
+			- **Select and Activate Object**:
+				- Deselects all objects, then selects and makes the newly created/updated terrain object active in the viewport.
+			- **Logging**: Prints status messages to the console about mesh creation/update.
+
+	4. `ipc_perin_map_computation(self, params)`: This method handles the Inter-Process Communication (IPC) to execute the `perlin_height_map.py` script as a separate process. It passes terrain generation parameters to the script and receives the computed height map.
+		- **Parameters**:
+			- `params` (`dict`): A dictionary containing all the parameters required for Perlin noise computation (e.g., `view_height`, `view_width`, `terrain_scale`, `offsets`, `seeds`, `octaves`, `persistence`, `lacunarity`, `min_height`, `max_height`).
+		- **Returns**:
+			- `numpy.ndarray`: A 2D NumPy array representing the computed height map.
+			- `None`: If an error occurs during subprocess execution or JSON parsing.
+		- **Functionality**:
+			- **Serialize Parameters**: Converts the `params` dictionary into a JSON string using `json.dumps()`. This string is passed as a command-line argument to the external Python script.
+			- **Construct Command**: Creates a list of command-line arguments: the Python executable path, the path to `perlin_height_map.py`, and the JSON string of parameters.
+			- **Execute Subprocess**:
+				- `subprocess.run(commands, capture_output=True, text=True, check=True)`: Executes the external Python script.
+					- `capture_output=True`: Captures the standard output and standard error.
+					- `text=True`: Decodes stdout/stderr as text.
+					- `check=True`: Raises a `CalledProcessError` if the subprocess returns a non-zero exit code.
+			- **Parse Output**:
+				- `json.loads(process.stdout)`: Parses the JSON string received from the subprocess's standard output, which is expected to be a flat list of height values.
+				- `np.array(height_list, dtype=np.float64).reshape(...)`: Converts the list into a 2D NumPy array with the correct dimensions (`view_height`, `view_width`).
+			- **Error Handling**: Catches any exceptions during subprocess execution or JSON parsing, prints an error message, and returns `None`.
+3. **Class:** `PTG_Generate_Operator`
+This class defines a Blender operator, which is an action that can be triggered by the user (e.g., by clicking a button in the UI).
+	1. **Operator Properties**
+		- `bl_idname`: `"ptg.generate_terrain"`
+			- A unique identifier for this operator. This is the string used in `ui.py` to link the "Generate Terrain" button to this operator.
+		- `bl_label`: `"Generate Terrain"`
+			- The human-readable name displayed on the button in the UI.
+		- `bl_description`: `"Generates a new procedural terrain mesh."`
+			- A tooltip that appears when hovering over the operator's button.
+		- `bl_options`: `{'REGISTER', 'UNDO'}`
+			- `'REGISTER'`: Ensures the operator is registered with Blender.
+			- `'UNDO'`: Makes the operator's action undoable in Blender's history.
+	2. `execute(self, context)` **Method**
+This method contains the main logic that is executed when the `PTG_Generate_Operator` is invoked.
+		- **Parameters**:
+			- `self`: The instance of the operator.
+			- `context`: A `bpy.context` object, providing access to Blender's current state.
+		- **Functionality**:
+			- **Access Scene and Properties**:
+				- `scene = context.scene`: Gets the current Blender scene.
+				- `ptg_props = scene.ptg_props`: Accesses the custom property group (`PTG_Properties`) attached to the scene, which holds all the user-defined terrain parameters.
+			- **Prepare Parameters for IPC**:
+				- Creates a `params` dictionary, mapping the `ptg_props` values to the keys expected by the `perlin_height_map.py` script. This ensures all necessary parameters are collected.
+			- **Initialize Terrain Mesh Generator:**
+				- `addon_dir = os.path.dirname(bpy.path.abspath(__file__))`: Gets the current addon directory.
+				- `mesh_generator = PTG_Generate_Terrain_Mesh(addon_dir=addon_dir)`: Creates an instance of the `PTG_Generate_Terrain_Mesh` class, passing the addon directory for initialization.
+			- **Compute Height Map:**
+				- `height_map = mesh_generator.ipc_perin_map_computation(params=params)`: Calls the IPC method to execute the external script and retrieve the height map.
+			- **Generate/Update Terrain Mesh:**
+				- If `height_map` is not `None`:
+					- `mesh_generator.terrain_mesh_generator(height_map_array=height_map, obj_name="PTG_Terrain_object")`: Calls the mesh generation method to create or update the Blender object.
+					- `self.report({'INFO'}, "Terrain generated successfully!")`: Reports a success message to Blender's info area.
+					- `return {'FINISHED'}`: Indicates that the operator completed successfully.
+				- If `height_map` is `None`:
+					- Prints an error log message.
+					- `self.report({'ERROR'}, "Failed to generate terrain height map.")`: Reports an error message to Blender's info area.
+					- `return {'CANCELLED'}`: Indicates that the operator was cancelled due to an error.
+4. **Conclusion**
+The `operators.py` file is the operational core of the "Procedural Terrain Generator" addon. It brings together the UI properties, external height map computation, and Blender's mesh creation capabilities to provide a seamless and interactive terrain generation experience for the user. By separating the concerns into `PTG_Generate_Terrain_Mesh` and `PTG_Generate_Operator`, the code maintains good organization and reusability.
+
 ### └── 📝 perlin_height_map.py - Documentation
 ___
