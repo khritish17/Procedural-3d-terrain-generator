@@ -388,6 +388,49 @@ The `unregister()` function is called by Blender when the addon is disabled. It'
 The `__init__.py` file is the backbone of the "Procedural Terrain Generator" addon, orchestrating its integration with Blender. It provides essential metadata, registers all functional components, and manages the addon's lifecycle by handling both setup (`register`) and cleanup (`unregister`) operations.
 
 ### └── 📝 util.py - Documentation
+> The `util.py` file contains utility functions for the "Procedural Terrain Generator" Blender addon.
+
+1. **File Purpose**
+The `util.py` file is designed to encapsulate helper functions that perform system-level checks and configurations necessary for the proper functioning of the Blender addon. Its primary role is to locate and store the path to the global Python executable, which is often required when an addon needs to interact with external Python libraries or processes not directly bundled with Blender's Python environment.
+2. **Functions**
+    - `check_and_configure(addon_dir)`
+      - This function checks for the existence of a file named `python_exe_path.txt` within the addon's directory. If this file does not exist, it attempts to locate the global Python executable and saves its path into the `python_exe_path.txt` file.
+      - **Parameters:**
+        - `addon_dir` (`str`): The absolute path to the directory where the addon's files are located. This path is used to construct the full path for `python_exe_path.txt`.
+      - **Functionality:**
+        - **Construct File Path:** It first constructs the full path to `python_exe_path.txt` by joining `addon_dir` with the filename.
+        - **Check Existence:** It checks if `python_exe_path.txt` already exists.
+        - **Configuration (if not found):**
+          - If the file is not found, it prints a log message indicating this.
+          - It then calls the `get_python_exe()` function to attempt to find the global Python executable.
+          - If `get_python_exe()` successfully returns a path, it writes this path into `python_exe_path.txt`.
+          - If `get_python_exe()` returns `None` (meaning no Python executable was found), an error message is logged.
+        - **Logging:** Throughout its execution, it prints log messages to the console indicating its progress and any issues encountered.
+
+      - **Purpose:** This function ensures that the addon has a persistent record of the global Python executable's location, which can be crucial for running external scripts or installing dependencies.
+    - `get_python_exe()`
+      - This function attempts to locate the path to a global Python executable on the user's system. It uses system-specific commands (`where` for Windows, `which` for macOS/Linux) to find the python or python3 executable.
+      - **Returns:**
+        - `str`: The absolute path to the Python executable if found.
+        - `None`: If no Python executable is found or if the operating system is unsupported.
+      - **Functionality:**
+        - **Platform Detection:** It determines the current operating system using sys.platform.
+        - **Command Selection:**
+          - For Windows (`win`): It sets the command to `["where", "python", "where", "python3"]`.
+          - For macOS (`darwin`) or Linux (`linux`): It sets the command to `["which", "python", "which", "python3"]`.
+          - For unsupported platforms, it logs a warning and returns `None`.
+        - **Execute Commands:** It iterates through the chosen commands (first trying python, then python3).
+          - It uses `subprocess.run()` to execute the command in the system's shell.
+          - `check=True`: Raises an exception if the command returns a non-zero exit code (indicating an error).
+          - `text=True`: Decodes stdout and stderr as text.
+          - `capture_output=True`: Captures stdout and stderr.
+          - `env=os.environ.copy()`: Ensures the command runs with the current environment variables.
+        - **Process Output:** If a command successfully finds a Python executable, its path (stripped of whitespace) is returned immediately.
+        - **Error Handling:** If `subprocess.run()` encounters an error (e.g., command not found, or `check=True fails`), it catches the exception, logs an error message, and continues to the next command (if any).
+        - **No Executable Found:** If none of the commands succeed in finding a Python executable, the function returns `None`.
+      - **Purpose:** This function provides a robust way to programmatically discover the location of the Python interpreter installed on the user's system, which is critical for external process execution.
+3. **Conclusion**
+The util.py file plays a vital role in the "Procedural Terrain Generator" addon by handling system-level interactions to ensure that external Python dependencies can be correctly managed and utilized. It centralizes the logic for locating the Python executable, making the addon more self-sufficient and portable across different user environments.
 ### └── 📝 ui.py - Documentation
 ### └── 📝 ui_properties.py - Documentation
 ### └── 📝 operators.py - Documentation
