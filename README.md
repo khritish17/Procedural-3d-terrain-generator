@@ -301,14 +301,14 @@ It aims to procedurally generate a realistic-looking 3D terrain. By combining mu
 ## 1 PTG Blender Addon - Structure
 ```
 Procedural_Terrain_Generator.zip
-└── Procedural_Terrain_Generator/
-    └── __init__.py
-    └── operators.py
-    └── perlin_height_map.py
-    └── python_exe_path.txt
-    └── ui.py
-    └── ui_properties.py
-    └── util.py
+└── 📁 Procedural_Terrain_Generator/
+    └── 📝 __init__.py
+    └── 📝 operators.py
+    └── 📝 perlin_height_map.py
+    └── 📝 python_exe_path.txt
+    └── 📝 ui.py
+    └── 📝 ui_properties.py
+    └── 📝 util.py
 ```
 <div align="center">
 <img src ="https://github.com/khritish17/Procedural-3d-terrain-generator/blob/master/PTG_HLD_LLD.png" height = "500">
@@ -388,6 +388,7 @@ The `unregister()` function is called by Blender when the addon is disabled. It'
 The `__init__.py` file is the backbone of the "Procedural Terrain Generator" addon, orchestrating its integration with Blender. It provides essential metadata, registers all functional components, and manages the addon's lifecycle by handling both setup (`register`) and cleanup (`unregister`) operations.
 
 ### └── 📝 util.py - Documentation
+___
 > The `util.py` file contains utility functions for the "Procedural Terrain Generator" Blender addon.
 
 1. **File Purpose**
@@ -432,6 +433,64 @@ The `util.py` file is designed to encapsulate helper functions that perform syst
 3. **Conclusion**
 The util.py file plays a vital role in the "Procedural Terrain Generator" addon by handling system-level interactions to ensure that external Python dependencies can be correctly managed and utilized. It centralizes the logic for locating the Python executable, making the addon more self-sufficient and portable across different user environments.
 ### └── 📝 ui.py - Documentation
+___
+> `ui.py` file defines the user interface (UI) panel for the "Procedural Terrain Generator" Blender addon.
+
+1. **File Purpose**
+    - The `ui.py` file is responsible for creating a custom panel within Blender's user interface. This panel allows users to interact with and control the parameters of the procedural terrain generation. It leverages Blender's UI system to display custom properties and trigger addon operations.
+2. **Class:** `PTG_UI`
+    - The PTG_UI class inherits from bpy.types.Panel, making it a custom UI panel that can be displayed in Blender.
+    1. **Panel Properties**: These class attributes define the behavior and appearance of the UI panel within Blender:
+        - `bl_label`: `"Terrain Generator Properties"`
+          - This string is displayed as the title at the top of the panel in the Blender UI.
+        - `bl_idname`: `"PTG_PT_terrain_generator"`
+          - A unique identifier for this panel. Blender uses this ID to reference the panel internally. It typically follows a convention like `ADDON_PREFIX_PT_panel_name`.
+        - `bl_space_type`: `'VIEW_3D'`
+          - Specifies the Blender editor space where this panel will appear. 'VIEW_3D' means it will be visible in the 3D Viewport. Other common values include 'PROPERTIES', 'NODE_EDITOR', etc.
+        - `bl_region_type`: `'UI'`
+          - Defines the specific region within the bl_space_type where the panel will be placed. 'UI' corresponds to the 'N' panel (the sidebar on the right side of the 3D Viewport). Other regions include 'TOOLS' (for the 'T' panel on the left).
+        - `bl_category`: `"PTG Tools"`
+          - This string determines the name of the tab under which the panel will be grouped in the sidebar (N-panel). Users can select this tab to reveal the "Terrain Generator Properties" panel.
+    2. `draw(self, context)` **Method**: The draw method is the core of any Blender UI panel. It is automatically called by Blender to render the contents of the panel. Within this method, you define the layout and the UI elements (buttons, properties, labels, etc.) that the user will see.
+        - **Parameters:**
+          - `self`: The instance of the PTG_UI panel itself.
+          - `context`: A bpy.context object, which provides access to Blender's current state, including the active scene, selected objects, and user preferences.
+        - **Functionality:**
+
+          1. **Get Layout and Scene**:
+              - `layout = self.layout`: Retrieves the layout object, which is used to add UI elements to the panel.
+              - `scene = context.scene`: Gets the current scene data block from the context.
+
+          2. **Access Custom Properties:**
+              - `ptg_props = scene.ptg_props`: Accesses the custom property group (`PTG_Properties`) that was registered in `__init__.py` and attached to the `bpy.types.Scene`. This provides a convenient way to get and set the addon's specific parameters.
+
+          3. **Terrain Dimension / Offsets Section:**
+              - `box = layout.box()`: Creates a visually grouped box within the panel for better organization.
+              - `box.label(text = "Terrain Dimension / Offsets:")`: Adds a label to the box.
+              - `col = box.column(align=True)`: Creates a column layout within the box, with align=True to align elements neatly.
+              - `col.prop(ptg_props, "terrain_length")`, `col.prop(ptg_props, "terrain_width")`, `col.prop(ptg_props, "offset_x")`, `col.prop(ptg_props, "offset_y")`: These lines add UI controls (properties) to the column. Each `prop()` call creates an input field or slider linked to the corresponding property defined in `ptg_props` (which comes from `ui_properties.PTG_Properties`).
+
+          4. **Terrain Base Noise Properties Section:**
+              - Similar to the dimension section, this creates another box for properties related to the base Perlin noise used for terrain generation.
+              - It displays properties like `terrain_seed`, `terrain_scale`, `terrain_octaves`, `terrain_persistence`, and `terrain_lacunarity`.
+
+          5. **Terrain Height Noise Properties Section:**
+              - This section focuses on properties for height modulation using another Perlin noise layer.
+              - It includes `height_seed`, `height_scale`, `height_octaves`, `height_persistence`, `height_lacunarity`, `min_height`, and `max_height`.
+
+          6. **Generate Button:**
+              - `layout.separator()`: Adds a visual separator line for better spacing.
+              - `row = layout.row(align = True)`: Creates a row layout for the button.
+              - `row.scale_y = 1.5`: Increases the vertical scale of the button, making it larger and more prominent. 
+              - `row.operator("ptg.generate_terrain", icon='MESH_PLANE')`: Adds a button to the row.
+                - `"ptg.generate_terrain"`: This is the bl_idname of the operator that will be executed when the button is clicked (this operator is defined in operators.py).
+                - `icon='MESH_PLANE'`: Assigns a Blender built-in icon to the button, making it more visually intuitive.
+
+3. **Conclusion**
+The `ui.py` file is crucial for providing an intuitive and organized interface for the "Procedural Terrain Generator" addon. By defining the `PTG_UI` panel and its `draw` method, it exposes all the necessary parameters and actions to the user within Blender's 3D Viewport, enabling easy customization and generation of terrains.
 ### └── 📝 ui_properties.py - Documentation
+___
 ### └── 📝 operators.py - Documentation
+___
 ### └── 📝 perlin_height_map.py - Documentation
+___
