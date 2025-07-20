@@ -1,4 +1,7 @@
 # Procedural Terrain Generator (PTG)
+> Download the .zip file (Addon file) from here ⬇️
+> 
+> [💾 Download](https://github.com/khritish17/Procedural-3d-terrain-generator/blob/master/Procedural_Terrain_Generator.zip)
 ## PTG Addon - Table of Contents
 
 - 1 PTG Blender-Addon Installation Guide
